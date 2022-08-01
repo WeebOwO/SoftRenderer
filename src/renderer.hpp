@@ -14,7 +14,6 @@ private:
     int m_window_width, m_window_height;
     SDL_Renderer* m_renderer;
     SDL_Window* m_window;
-
 private:
     void tickrender(const StaticMesh& mesh) {
         for (auto&& index_seq : mesh.indexbuffer) {

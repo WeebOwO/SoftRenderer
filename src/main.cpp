@@ -3,21 +3,21 @@
 #include "mesh.hpp"
 #include "renderer.hpp"
 #include "math.hpp"
+#include "shader.hpp"
 
-static std::vector<std::vector<float>> vertexbuffer = {
-    //位置
-    {240.0f, 100.0f, 255, 0, 0 },
-    {150.f, 250.0f, 0, 255, 0 },
-    {330.f, 250.0f, 0, 0, 255 },
+std::vector<Vertex> vertex_buffer = {
+    //坐标                //颜色rgba 
+    {{300.0f, 150.0f, 1.0f}, {255, 0, 0, 255}},
+    {{1.0f, 0.0f, 1.0f}, {0, 255, 0, 255}},
+    {{1.0f, 0.0f, 1.0f}, {0, 0, 255, 255}},
 };
 
-static std::vector<std::vector<int>> indexbuffer = { 
+std::vector<std::vector<int>> index_buffer = {
     {0, 1, 2}
 };
 
+
 int main(int argc, char* argv[]) {
     Renderer renderer(600, 600);
-    StaticMesh mesh(vertexbuffer, indexbuffer);
-    renderer.run(mesh);
     return 0;
 }
