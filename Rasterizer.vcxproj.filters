@@ -23,13 +23,10 @@
     <ClInclude Include="src\math.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\shader.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mesh.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\renderer.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\shader.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
