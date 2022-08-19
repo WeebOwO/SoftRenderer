@@ -10,7 +10,7 @@
 #include "math.hpp"
 
 struct Vertex {
-    Vec3f pos;
+    Vec4f pos;
     Vec4i color;
 };
 
@@ -20,7 +20,6 @@ private:
     SDL_Renderer* m_renderer;
     SDL_Window* m_window;
     std::function<Vertex(Vertex)> vertex_shader;
-
 private:
     void tickrender(const std::vector<Vertex>& vertex_buffer, const std::vector<std::vector<int>>& index_buffer) {
         for (auto&& index_seq : index_buffer) {
@@ -30,16 +29,15 @@ private:
     }
 
     void draw_primitive(const Vertex& a, const Vertex& b, const Vertex& c) {
-        
+        //Vertex shader调用
         Vertex a_trans = vertex_shader(a), b_trans = vertex_shader(b), c_trans = vertex_shader(c);
 
-        int min_x = std::min({ a.pos.x, b.pos.x, c.pos.x });
-        int min_y = std::min({ a.pos.y, b.pos.y, c.pos.y });
-        int max_x = std::max({ a.pos.x, b.pos.x, c.pos.x });
-        int max_y = std::max({ a.pos.y, b.pos.y, c.pos.y });
+        int min_x = std::min({ a_trans.pos.x, b_trans.pos.x, c_trans.pos.x });
+        int min_y = std::min({ a_trans.pos.y, a_trans.pos.y, c_trans.pos.y });
+        int max_x = std::max({ a_trans.pos.x, b_trans.pos.x, c_trans.pos.x });
+        int max_y = std::max({ a_trans.pos.y, b_trans.pos.y, c_trans.pos.y });
 
         //光栅化部分
-        SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
         for (int x = min_x; x <= max_x; ++x) {
             for (int y = min_y; y <= max_y; ++y) {
                 //用重心坐标来判断当前点是不是在三角形内, https://zhuanlan.zhihu.com/p/65495373参考证明资料
@@ -52,7 +50,6 @@ private:
                     Uint8 g = static_cast<Uint8>(barycentric.x * a_trans.color.g + barycentric.y * b_trans.color.g + barycentric.z * c_trans.color.g);
                     Uint8 b = static_cast<Uint8>(barycentric.x * a_trans.color.b + barycentric.y * b_trans.color.b + barycentric.z * c_trans.color.b);
                     SDL_SetRenderDrawColor(m_renderer, r, g, b, 255);
-                    //------每个pixel调用一次fragment_shader------------
                     SDL_RenderDrawPoint(m_renderer, x, y);
                 }
             }

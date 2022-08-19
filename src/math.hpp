@@ -812,3 +812,15 @@ inline static Mat4x4f matrix_set_perspective(float fovy, float aspect, float zn,
 	m.m[2][3] = 1;
 	return m;
 }
+
+
+inline static Mat4x4f matrix_set_viewport(int height, int width) {
+	Mat4x4f m = matrix_set_zero();
+	m.m[0][0] = width / 2.0f;
+	m.m[1][1] = -height / 2.0f;
+	m.m[3][0] = width / 2.0f;
+	m.m[3][1] = height / 2.0f;
+	m.m[2][2] = 1.0f;
+	m.m[3][3] = 1.0f;
+	return m;
+}
