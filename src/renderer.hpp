@@ -4,6 +4,9 @@
 #include <initializer_list>
 #include <algorithm>
 #include <functional>
+#include <chrono>
+#include <format>
+
 
 #include <SDL.h>
 
@@ -24,35 +27,36 @@ class Renderer {
 private:
     int m_window_width, m_window_height;
     SDL_Renderer* m_renderer;
-    SDL_Window* m_window;
     std::function<Vertex(Vertex, Transform)> vertex_shader;
-    int lastframe = 0, current_frame = 0;
+    std::chrono::steady_clock::time_point m_last_tick_time_point{ std::chrono::steady_clock::now() };
 private:
-    void tickrender(const std::vector<Vertex>& vertex_buffer, const std::vector<std::vector<int>>& index_buffer) {
+    void tickrender(const std::vector<Vertex>& vertex_buffer, const std::vector<std::vector<int>>& index_buffer, float delta_time) {
         for (auto&& index_seq : index_buffer) {
             int index_a = index_seq[0], index_b = index_seq[1], index_c = index_seq[2];
-            draw_primitive(vertex_buffer[index_a], vertex_buffer[index_b], vertex_buffer[index_c]);
+            draw_primitive(vertex_buffer[index_a], vertex_buffer[index_b], vertex_buffer[index_c], delta_time);
         }
     }
 
-    void draw_primitive(const Vertex& a, const Vertex& b, const Vertex& c) {
+    void draw_primitive(const Vertex& a, const Vertex& b, const Vertex& c, float delta_time) {
         //Vertex shader调用
-        Mat4x4f model = matrix_set_identity();
-        Mat4x4f view = matrix_set_identity();
+        static float move_speed = 100;
+        static float rotate_speed = 100;
+        static float offset = 0;
+        offset += move_speed * delta_time / 1000.0f;
+        std::cout << std::format("offset is {}", offset) << std::endl;
+        Mat4x4f model = matrix_set_translate(0, 0, 0);
+        Mat4x4f view = matrix_set_lookat(Vec3f(0, 0, 0), Vec3f(0, 0, 1), Vec3f(0, 1, 0));
         Mat4x4f projection = matrix_set_identity();
         Transform t(model, view, projection);
         Vertex a_trans = vertex_shader(a, t), b_trans = vertex_shader(b, t), c_trans = vertex_shader(c, t);
-
-        int min_x = std::min({ a_trans.pos.x, b_trans.pos.x, c_trans.pos.x });
-        int min_y = std::min({ a_trans.pos.y, b_trans.pos.y, c_trans.pos.y });
-        int max_x = std::max({ a_trans.pos.x, b_trans.pos.x, c_trans.pos.x });
-        int max_y = std::max({ a_trans.pos.y, b_trans.pos.y, c_trans.pos.y });
+        
+        //求出三角形的AABB包围盒
+        int min_x = static_cast<int>(std::min({ a_trans.pos.x, b_trans.pos.x, c_trans.pos.x }));
+        int min_y = static_cast<int>(std::min({ a_trans.pos.y, b_trans.pos.y, c_trans.pos.y }));
+        int max_x = static_cast<int>(std::max({ a_trans.pos.x, b_trans.pos.x, c_trans.pos.x }));
+        int max_y = static_cast<int>(std::max({ a_trans.pos.y, b_trans.pos.y, c_trans.pos.y }));
 
         //光栅化部分
-        SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
-        SDL_RenderDrawLine(m_renderer, a.pos.x, a.pos.y, b.pos.x, b.pos.y);
-        SDL_RenderDrawLine(m_renderer, b.pos.x, b.pos.y, c.pos.x, c.pos.y);
-        SDL_RenderDrawLine(m_renderer, c.pos.x, c.pos.y, a.pos.x, a.pos.y);
         for (int x = min_x; x <= max_x; ++x) {
             for (int y = min_y; y <= max_y; ++y) {
                 //用重心坐标来判断当前点是不是在三角形内, https://zhuanlan.zhihu.com/p/65495373参考证明资料
@@ -75,10 +79,23 @@ private:
         }
     }
 
+    float cal_delta_time() {
+        float delta_time;
+        {
+            using namespace std::chrono;
+            steady_clock::time_point tick_time_point = steady_clock::now();
+            duration<float> time_span = duration_cast<duration<float>>(tick_time_point - m_last_tick_time_point);
+            delta_time = time_span.count();
+            m_last_tick_time_point = tick_time_point;
+        }
+        return delta_time;
+    }
+
 public:
     Renderer() = delete;
     Renderer(int window_width, int window_height):m_window_width(window_width), m_window_height(window_height) {
         SDL_CreateWindowAndRenderer(window_width, window_height, SDL_WINDOW_RESIZABLE, &m_window, &m_renderer);
+        m_depth_buffer.resize(window_height, std::vector<int>(window_width, 0));
     }
 
     void run(const std::vector<Vertex>& vertex_buffer, const std::vector<std::vector<int>>& index_buffer) {
@@ -93,7 +110,9 @@ public:
             //画之前将帧缓存设置为背景颜色。
             SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
             SDL_RenderClear(m_renderer);
-            tickrender(vertex_buffer, index_buffer);
+            float delta_time = cal_delta_time();
+            std::cout << delta_time * 1000 << "ms" << std::endl;
+            tickrender(vertex_buffer, index_buffer, delta_time);
             SDL_RenderPresent(m_renderer);
         }
     }

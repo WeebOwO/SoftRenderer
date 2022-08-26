@@ -1,13 +1,13 @@
 ﻿#include <vector>
-#include <cmath>
+
 #include "renderer.hpp"
 #include "shader.hpp"
 
 std::vector<Vertex> vertex_buffer = {
     //齐次坐标                //颜色rgba 
-    {{-1.0f, 0.0f, 5.0f, 1.0f}, {255, 0, 0, 255}},
-    {{0.0f, 1.0f, 5.0f, 1.0f}, {0, 255, 0, 255}},
-    {{1.0f, 0.0f, 5.0f, 1.0f}, {0, 0, 255, 255}},
+    {{-1.0f, 0.0f, 2.0f, 1.0f}, {255, 0, 0, 255}},
+    {{0.0f, 1.0f, 2.0f, 1.0f}, {0, 255, 0, 255}},
+    {{1.0f, 0.0f, 2.0f, 1.0f}, {0, 0, 255, 255}},
 };
 
 

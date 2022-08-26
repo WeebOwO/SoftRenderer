@@ -29,5 +29,20 @@
     <ClInclude Include="src\shader.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\window.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mesh.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\buffer.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vertex.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\light.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
