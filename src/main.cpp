@@ -13,12 +13,16 @@ std::vector<std::vector<int>> index_buffer = {
     {0, 1, 2}
 };
 
-WindowCreateInfo window_info = { 600, 600, "CoreEegine" };
+WindowCreaterInfo window_info = {
+    "CoreEngine",
+    600,
+    600
+};
+
 int main(int argc, char* argv[]) {
     Buffer buffer(vertex_buffer, index_buffer);
-    Window window(window_info);
     Shader shader(vs_shader);
-    Renderer renderer(&window, &shader);
+    Renderer renderer(window_info, &shader);
     renderer.run(buffer);
     return 0;
 }

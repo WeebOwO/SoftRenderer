@@ -11,21 +11,22 @@ void Renderer::tickrender(float delta_time, const Buffer& buffer) {
     SDL_RenderPresent(m_renderer);
 }
 
+
 void Renderer::run(const Buffer& buffer) {
-    while (!m_window->window_should_close()) {
-        m_window->process_input();
+    int quit = 0;
+    SDL_Event event;
+    while (!quit) {
+        if (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                quit = 1;
+                break;
+            }
+        }
         float delta_time = cal_delta_time();
         tickrender(delta_time, buffer);
     }
+    
 }
-
-
-Renderer::Renderer(Window* window, Shader* shader) {
-    m_window = std::unique_ptr<Window>(window);
-    m_shader = std::unique_ptr<Shader>(shader);
-    m_renderer = SDL_CreateRenderer(m_window->get_window(), -1, SDL_RENDERER_ACCELERATED);
-}
-
 
 void Renderer::rasterize(const Vertex& a_trans, const Vertex& b_trans, const Vertex& c_trans) {
     //求出三角形的AABB包围盒
@@ -61,7 +62,6 @@ void Renderer::draw_primitive(const Vertex& a, const Vertex& b, const Vertex& c)
     rasterize(a_trans, b_trans, c_trans);
 }
 
-
 float Renderer::cal_delta_time() {
     float delta_time;
     {
@@ -74,6 +74,13 @@ float Renderer::cal_delta_time() {
     return delta_time;
 }
 
+Renderer::Renderer(const WindowCreaterInfo& window_info, Shader* shader): m_shader(shader) {
+    SDL_CreateWindowAndRenderer(window_info.window_width, window_info.window_height, SDL_WINDOW_RESIZABLE, &m_window, &m_renderer);
+    SDL_SetWindowTitle(m_window, window_info.title);
+}
+
 Renderer::~Renderer() {
     SDL_DestroyRenderer(m_renderer);
+    SDL_DestroyWindow(m_window);
+    SDL_Quit();
 }

@@ -10,15 +10,20 @@
 #include <SDL.h>
 
 #include "math.h"
-#include "window.h"
 #include "shader.h"
 #include "buffer.h"
 
+struct WindowCreaterInfo {
+    const char* title{ "CoreEngine" };
+    int window_width{ 600 };
+    int window_height{ 600 };
+};
+
 class Renderer {
 private:
-    SDL_Renderer* m_renderer;
-    std::unique_ptr<Window> m_window;
-    std::unique_ptr<Shader> m_shader;
+    SDL_Renderer* m_renderer{ nullptr };
+    SDL_Window* m_window{ nullptr };
+    Shader* m_shader{ nullptr };
     std::chrono::steady_clock::time_point m_last_tick_time_point{ std::chrono::steady_clock::now() };
 private:
     void tickrender(float delta_time, const Buffer& buffer);
@@ -28,11 +33,9 @@ private:
 
 public:
     Renderer() = default;
+    Renderer(const WindowCreaterInfo& window_info, Shader* shader);
     ~Renderer();
-    Renderer(Window* window, Shader* shader);
-
     void run(const Buffer& buffer);
-
     inline void set_color(Uint8 r, Uint8 g, Uint8 b, Uint8 a) const {  SDL_SetRenderDrawColor(m_renderer, r, g, b, a); }
       
 };
