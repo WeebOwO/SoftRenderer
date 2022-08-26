@@ -159,17 +159,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\buffer.cpp" />
+    <ClCompile Include="src\light.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\renderer.cpp" />
+    <ClCompile Include="src\shader.cpp" />
+    <ClCompile Include="src\window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\buffer.hpp" />
-    <ClInclude Include="src\light.hpp" />
-    <ClInclude Include="src\mesh.hpp" />
-    <ClInclude Include="src\renderer.hpp" />
-    <ClInclude Include="src\math.hpp" />
-    <ClInclude Include="src\shader.hpp" />
-    <ClInclude Include="src\vertex.hpp" />
-    <ClInclude Include="src\window.hpp" />
+    <ClInclude Include="src\buffer.h" />
+    <ClInclude Include="src\global.h" />
+    <ClInclude Include="src\light.h" />
+    <ClInclude Include="src\renderer.h" />
+    <ClInclude Include="src\math.h" />
+    <ClInclude Include="src\shader.h" />
+    <ClInclude Include="src\window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

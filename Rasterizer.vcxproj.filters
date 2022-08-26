@@ -18,30 +18,42 @@
     <ClCompile Include="src\main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\buffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\light.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\window.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\math.hpp">
+    <ClInclude Include="src\math.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer.hpp">
+    <ClInclude Include="src\renderer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\shader.hpp">
+    <ClInclude Include="src\shader.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\window.hpp">
+    <ClInclude Include="src\window.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\mesh.hpp">
+    <ClInclude Include="src\buffer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\buffer.hpp">
+    <ClInclude Include="src\light.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\vertex.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\light.hpp">
+    <ClInclude Include="src\global.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
