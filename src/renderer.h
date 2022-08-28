@@ -26,7 +26,7 @@ private:
     SDL_Renderer* m_renderer{ nullptr };
     SDL_Window* m_window{ nullptr };
     Shader* m_shader{ nullptr };
-
+    std::vector<std::vector<float>> m_depth_buffer;
     std::chrono::steady_clock::time_point m_last_tick_time_point{ std::chrono::steady_clock::now() };
 private:
     void tickrender(float delta_time, const Buffer& buffer);
@@ -40,5 +40,5 @@ public:
     ~Renderer();
     void run(const Buffer& buffer);
     inline void set_color(Uint8 r, Uint8 g, Uint8 b, Uint8 a) const {  SDL_SetRenderDrawColor(m_renderer, r, g, b, a); }
-      
+    void render_clear();
 };
