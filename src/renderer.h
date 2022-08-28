@@ -6,12 +6,14 @@
 #include <chrono>
 #include <format>
 #include <memory>
+#include <vector>
 
 #include <SDL.h>
 
 #include "math.h"
 #include "shader.h"
 #include "buffer.h"
+#include "global.h"
 
 struct WindowCreaterInfo {
     const char* title{ "CoreEngine" };
@@ -24,6 +26,7 @@ private:
     SDL_Renderer* m_renderer{ nullptr };
     SDL_Window* m_window{ nullptr };
     Shader* m_shader{ nullptr };
+
     std::chrono::steady_clock::time_point m_last_tick_time_point{ std::chrono::steady_clock::now() };
 private:
     void tickrender(float delta_time, const Buffer& buffer);

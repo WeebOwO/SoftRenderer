@@ -1,6 +1,14 @@
 ﻿#include "renderer.h"
 
 void Renderer::tickrender(float delta_time, const Buffer& buffer) {
+    static float rotate_speed = 10.0f;
+    static float angle = 0;
+    angle += rotate_speed * delta_time / 1000.0f;
+    Mat4x4f rotate = matrix_set_rotate(1, 0, 0, angle * 180.0f / 3.14f);
+    Mat4x4f offset = matrix_set_translate(0, 0, 3);
+    Mat4x4f model = rotate * offset;
+    std::cout << angle << std::endl;
+    global_context::shader_context->set_model_mat(model);
     set_color(0, 0, 0, 255);
     SDL_RenderClear(m_renderer);
     auto&& vertex_buffer = buffer.verter_buffer;
@@ -25,7 +33,6 @@ void Renderer::run(const Buffer& buffer) {
         float delta_time = cal_delta_time();
         tickrender(delta_time, buffer);
     }
-    
 }
 
 void Renderer::rasterize(const Vertex& a_trans, const Vertex& b_trans, const Vertex& c_trans) {

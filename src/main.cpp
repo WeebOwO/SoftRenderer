@@ -4,9 +4,10 @@ extern Vertex vs_shader(Vertex a);
 
 std::vector<Vertex> vertex_buffer = {
     //齐次坐标                //颜色rgba 
-    {{-1.0f, 0.0f, 2.0f, 1.0f}, {255, 0, 0, 255}},
-    {{0.0f, 1.0f, 2.0f, 1.0f}, {0, 255, 0, 255}},
-    {{1.0f, 0.0f, 2.0f, 1.0f}, {0, 0, 255, 255}},
+    {{-1.0f, 0.0f, 0.0f, 1.0f}, {255, 0, 0, 255}},
+    {{0.0f, 1.0f, 0.0f, 1.0f}, {0, 255, 0, 255}},
+    {{1.0f, 0.0f, 0.0f, 1.0f}, {0, 0, 255, 255}},
+    {{0.0f, -1.0f, 0.0f, 1.0f}, {0, 0, 255, 255}},
 };
 
 std::vector<std::vector<int>> index_buffer = {
@@ -20,9 +21,13 @@ WindowCreaterInfo window_info = {
 };
 
 int main(int argc, char* argv[]) {
-    Buffer buffer(vertex_buffer, index_buffer);
+    //着色器设置
     Shader shader(vs_shader);
+
+    //各种缓冲区设置
+    Buffer buffer(vertex_buffer, index_buffer);
+    //渲染器启动
     Renderer renderer(window_info, &shader);
     renderer.run(buffer);
     return 0;
-}
+} 

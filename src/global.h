@@ -1,8 +1,6 @@
 #pragma once
+#include "renderer.h"
 
-#include "buffer.h"
-#include <vector>
-
-class GlobalContext {
-    
-};
+namespace global_context {
+    extern ShaderContext* shader_context;
+}
