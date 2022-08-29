@@ -4,19 +4,18 @@
 #include "renderer.h"
 
 void Renderer::tickrender(float delta_time, const Buffer& buffer) {
-    static float rotate_speed = 5.0f;
+    static float rotate_speed = 1.0f;
     static float angle = 0;
     angle += rotate_speed * delta_time;
-    
     set_color(0, 0, 0, 255);
     render_clear();
     auto&& vertex_buffer = buffer.verter_buffer;
     auto&& index_buffer = buffer.index_buffer;
     for (auto&& index : index_buffer) {
         Mat4x4f offset = matrix_set_translate(0, 0, 5);
-        Mat4x4f rotate = matrix_set_rotate(0, 1, 0, angle);
+        Mat4x4f rotate = matrix_set_rotate(1, 1, 0, angle);
         Mat4x4f model = rotate * offset;
-        Mat4x4f look_at = matrix_set_lookat({ 0, 0, -1 }, { 0,0,0 }, { 0,0,1 });
+        Mat4x4f look_at = matrix_set_lookat({ 0,0,-1 }, { 0,0,0 }, { 0,0,1 });
         global_context::shader_context->set_model_mat(model);
         draw_primitive(vertex_buffer[index[0]], vertex_buffer[index[1]], vertex_buffer[index[2]]);
     }
@@ -59,7 +58,7 @@ void Renderer::rasterize(const Vertex& a_trans, const Vertex& b_trans, const Ver
             Vec3f y_part(b_trans.pos.y - a_trans.pos.y, c_trans.pos.y - a_trans.pos.y, a_trans.pos.y - y);
             Vec3f u_part = vector_cross(x_part, y_part);
             Vec3f barycentric(1.0f - (u_part.x + u_part.y) / u_part.z, u_part.x / u_part.z, u_part.y / u_part.z);
-            if (barycentric.x > 0 && barycentric.y > 0 && barycentric.z > 0) {
+            if (barycentric.x >= 0 && barycentric.y >= 0 && barycentric.z >= 0) {
                 //通过正确的深度来计算插值, 因为屏幕空间下直接利用重心坐标系的结果是不符合在观察坐标系的所看到的深度
                 //其根本原因是，对于深度来说，透视投影的变化对于深度(z)来说并非线性变化，所以投影过后的z值也不能简单的根据深度来进行插值
                 float z = 1 / (barycentric.x * (1 / a_trans.pos.z) + barycentric.y * (1 / b_trans.pos.z) + barycentric.z * (1 / c_trans.pos.z));
@@ -70,7 +69,7 @@ void Renderer::rasterize(const Vertex& a_trans, const Vertex& b_trans, const Ver
                 Uint8 r = static_cast<Uint8>(z * (barycentric.x * a_trans.color.r * a_trans_inverse_z + barycentric.y * b_trans.color.r * b_trans_inverse_z + barycentric.z * c_trans.color.r * c_trans_inverse_z));
                 Uint8 g = static_cast<Uint8>(z * (barycentric.x * a_trans.color.g * a_trans_inverse_z + barycentric.y * b_trans.color.g * b_trans_inverse_z + barycentric.z * c_trans.color.g * c_trans_inverse_z));
                 Uint8 b = static_cast<Uint8>(z * (barycentric.x * a_trans.color.b * a_trans_inverse_z + barycentric.y * b_trans.color.b * b_trans_inverse_z + barycentric.z * c_trans.color.b * c_trans_inverse_z));
-                SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
+                SDL_SetRenderDrawColor(m_renderer, r, 255, 255, 255);
                 SDL_RenderDrawPoint(m_renderer, x, y);
             }
         }

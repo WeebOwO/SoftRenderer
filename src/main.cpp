@@ -30,7 +30,7 @@ std::vector<std::vector<int>> index_buffer = {
 
     {0, 3, 4},
     {3, 4, 7},
-
+    
     {1, 2, 5},
     {2, 5, 6}
 
