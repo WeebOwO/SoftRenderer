@@ -18,12 +18,6 @@
     <ClCompile Include="src\main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\buffer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\light.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\renderer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

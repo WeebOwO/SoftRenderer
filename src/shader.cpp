@@ -4,7 +4,6 @@
 //extern WindowCreaterInfo window_info;
 
 Vertex vs_shader(Vertex a) {
-
     Light light({ 0.2f, 1.0f, 2.0f }, {1.0f, 1.0f, 1.0f});
     Mat4x4f model = global_context::shader_context->get_model_mat();
     Mat4x4f view = global_context::shader_context->get_view_mat();
