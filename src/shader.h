@@ -4,11 +4,13 @@
 
 #include <SDL.h>
 #include "math.h"
+#include "light.h"
 
 struct Vertex {
-    Vec4f pos;
-    Vec4i color;
-};
+    Vec3f pos;
+    Vec3f normal;
+    Vec3f color;
+}; 
 
 struct Fragment{
     Vec3f world_pos;
@@ -24,6 +26,7 @@ using FragmentShader = std::function<void(Fragment)>;
 class ShaderContext {
 private:
     Mat4x4f m_model, m_view, m_projection;
+    Light m_light;
     ShaderContext() = default;
     ShaderContext(const Mat4x4f& model, const Mat4x4f& view, const Mat4x4f& projection) : m_model(model), m_view(view), m_projection(projection) {}
 public:
@@ -36,7 +39,9 @@ public:
     inline Mat4x4f get_view_mat() { return m_view; }
     inline Mat4x4f get_projection_mat() { return m_projection; }
     inline Mat4x4f get_transform() { return m_model * m_view * m_projection; }
+    inline Light get_light() { return m_light; }
 
+    inline void set_light(const Light& light) { m_light = light; }
     inline void set_model_mat(const Mat4x4f& model) { m_model = model; }
     inline void set_view_mat(const Mat4x4f& view) { m_view = view; }
     inline void set_projection_mat(const Mat4x4f& projection) { m_projection = projection; }
@@ -46,7 +51,6 @@ public:
 class Shader {
 private:
     VertexShader m_vs_shader;
-
 public:
     ~Shader() = default;
     Shader(VertexShader vs_shader) : m_vs_shader(vs_shader) {}

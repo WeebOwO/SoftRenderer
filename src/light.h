@@ -1,17 +1,7 @@
 #pragma once
 
-class light {
-   
-};
+#include "math.h"
 
-class Pointlight : public light {
-
-};
-
-class Spotlight : public light {
-
-};
-
-class Directionlight : public light {
-
+struct Light {
+    Vec3f light_pos, light_color;
 };

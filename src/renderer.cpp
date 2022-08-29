@@ -7,12 +7,13 @@ void Renderer::tickrender(float delta_time, const Buffer& buffer) {
     static float rotate_speed = 1.0f;
     static float angle = 0;
     angle += rotate_speed * delta_time;
+    
     set_color(0, 0, 0, 255);
     render_clear();
     auto&& vertex_buffer = buffer.verter_buffer;
     auto&& index_buffer = buffer.index_buffer;
     for (auto&& index : index_buffer) {
-        Mat4x4f offset = matrix_set_translate(0, 0, 5);
+        Mat4x4f offset = matrix_set_translate(0, 0, 2.5);
         Mat4x4f rotate = matrix_set_rotate(1, 1, 0, angle);
         Mat4x4f model = rotate * offset;
         Mat4x4f look_at = matrix_set_lookat({ 0,0,-1 }, { 0,0,0 }, { 0,0,1 });
@@ -66,10 +67,10 @@ void Renderer::rasterize(const Vertex& a_trans, const Vertex& b_trans, const Ver
                 if (y >= m_depth_buffer.size() || x >= m_depth_buffer[0].size() || m_depth_buffer[y][x] < z) continue;
                 m_depth_buffer[y][x] = z;
                 float a_trans_inverse_z = 1 / a_trans.pos.z, b_trans_inverse_z = 1 / b_trans.pos.z, c_trans_inverse_z = 1 / c_trans.pos.z;
-                Uint8 r = static_cast<Uint8>(z * (barycentric.x * a_trans.color.r * a_trans_inverse_z + barycentric.y * b_trans.color.r * b_trans_inverse_z + barycentric.z * c_trans.color.r * c_trans_inverse_z));
-                Uint8 g = static_cast<Uint8>(z * (barycentric.x * a_trans.color.g * a_trans_inverse_z + barycentric.y * b_trans.color.g * b_trans_inverse_z + barycentric.z * c_trans.color.g * c_trans_inverse_z));
-                Uint8 b = static_cast<Uint8>(z * (barycentric.x * a_trans.color.b * a_trans_inverse_z + barycentric.y * b_trans.color.b * b_trans_inverse_z + barycentric.z * c_trans.color.b * c_trans_inverse_z));
-                SDL_SetRenderDrawColor(m_renderer, r, 255, 255, 255);
+                Uint8 r = static_cast<Uint8>(z * (barycentric.x * a_trans.color.r * a_trans_inverse_z + barycentric.y * b_trans.color.r * b_trans_inverse_z + barycentric.z * c_trans.color.r * c_trans_inverse_z) * 255);
+                Uint8 g = static_cast<Uint8>(z * (barycentric.x * a_trans.color.g * a_trans_inverse_z + barycentric.y * b_trans.color.g * b_trans_inverse_z + barycentric.z * c_trans.color.g * c_trans_inverse_z) * 255);
+                Uint8 b = static_cast<Uint8>(z * (barycentric.x * a_trans.color.b * a_trans_inverse_z + barycentric.y * b_trans.color.b * b_trans_inverse_z + barycentric.z * c_trans.color.b * c_trans_inverse_z) * 255);
+                SDL_SetRenderDrawColor(m_renderer, r, g, b, 255);
                 SDL_RenderDrawPoint(m_renderer, x, y);
             }
         }
