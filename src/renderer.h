@@ -30,7 +30,6 @@ private:
     std::chrono::steady_clock::time_point m_last_tick_time_point{ std::chrono::steady_clock::now() };
 private:
     void tickrender(float delta_time, const Buffer& buffer);
-    void rasterize(const Vertex& a_trans, const Vertex& b_trans, const Vertex& c_trans);
     void draw_primitive(const Vertex& a, const Vertex& b, const Vertex& c);
     float cal_delta_time();
 

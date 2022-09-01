@@ -1,6 +1,7 @@
 ﻿#include "renderer.h"
 
 extern Vertex vs_shader(Vertex a);
+extern Fragment fs_shader(Fragment a);
 
 std::vector<Vertex> vertex_buffer = {
     //齐次坐标                //颜色rgb
@@ -75,7 +76,7 @@ WindowCreaterInfo window_info = {
 
 int main(int argc, char* argv[]) {
     //着色器设置
-    Shader shader(vs_shader);
+    Shader shader(vs_shader, fs_shader);
     //各种缓冲区设置
     Buffer buffer(vertex_buffer, index_buffer);
     //渲染器启动

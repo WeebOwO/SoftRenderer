@@ -16,12 +16,14 @@ void Renderer::tickrender(float delta_time, const Buffer& buffer) {
     Mat4x4f offset = matrix_set_translate(0, 0, 2.5);
     Mat4x4f rotate = matrix_set_rotate(1, 1, 0, angle);
     Mat4x4f model = rotate * offset;
+    Mat4x4f normal_mat = matrix_invert(model).Transpose();
     Mat4x4f look_at = matrix_set_lookat({ 0, 0, -1 }, { 0, 0, 0 }, { 0, 1, 0 });
     Mat4x4f projection = matrix_set_perspective(3.1415926f * 0.35f, 1.0f, 1.0f, 10.0f);
     for (auto&& index : index_buffer) {
         global_context::shader_context->set_model_mat(model);
         global_context::shader_context->set_view_mat(look_at);
         global_context::shader_context->set_projection_mat(projection);
+        global_context::shader_context->set_normal_model(normal_mat);
         draw_primitive(vertex_buffer[index[0]], vertex_buffer[index[1]], vertex_buffer[index[2]]);
     }
     SDL_RenderPresent(m_renderer);
@@ -50,13 +52,17 @@ void Renderer::render_clear() {
     }
 }
 
-void Renderer::rasterize(const Vertex& a_trans, const Vertex& b_trans, const Vertex& c_trans) {
+void Renderer::draw_primitive(const Vertex& a, const Vertex& b, const Vertex& c) {
+    VertexShader vertex_shader = m_shader->get_vs_shader(); 
+    FragmentShader fragment_shader = m_shader->get_fs_shader();
+    set_color(255, 0, 0, 255);
+    Vertex a_trans = vertex_shader(a), b_trans = vertex_shader(b), c_trans = vertex_shader(c);
     //求出三角形的AABB包围盒
     int min_x = static_cast<int>(std::min({ a_trans.pos.x, b_trans.pos.x, c_trans.pos.x }));
     int min_y = static_cast<int>(std::min({ a_trans.pos.y, b_trans.pos.y, c_trans.pos.y }));
     int max_x = static_cast<int>(std::max({ a_trans.pos.x, b_trans.pos.x, c_trans.pos.x }));
     int max_y = static_cast<int>(std::max({ a_trans.pos.y, b_trans.pos.y, c_trans.pos.y }));
-    
+
     for (int x = min_x; x <= max_x; ++x) {
         for (int y = min_y; y <= max_y; ++y) {
             //用重心坐标来判断当前点是不是在三角形内, https://zhuanlan.zhihu.com/p/65495373参考证明资料
@@ -76,22 +82,12 @@ void Renderer::rasterize(const Vertex& a_trans, const Vertex& b_trans, const Ver
                 Uint8 g = static_cast<Uint8>(z * (barycentric.x * a_trans.color.g * a_trans_inverse_z + barycentric.y * b_trans.color.g * b_trans_inverse_z + barycentric.z * c_trans.color.g * c_trans_inverse_z) * 255);
                 Uint8 b = static_cast<Uint8>(z * (barycentric.x * a_trans.color.b * a_trans_inverse_z + barycentric.y * b_trans.color.b * b_trans_inverse_z + barycentric.z * c_trans.color.b * c_trans_inverse_z) * 255);
                 SDL_SetRenderDrawColor(m_renderer, r, g, b, 255);
-                SDL_RenderDrawPoint(m_renderer, x, y);
+                SDL_RenderDrawPoint(m_renderer, x, y);  
             }
         }
     }
 }
 
-void Renderer::draw_primitive(const Vertex& a, const Vertex& b, const Vertex& c) {
-    VertexShader vertex_shader = m_shader->get_vs_shader();
-    set_color(255, 0, 0, 255);
-    Vertex a_trans = vertex_shader(a), b_trans = vertex_shader(b), c_trans = vertex_shader(c);
-    
-    /*SDL_RenderDrawLine(m_renderer, a_trans.pos.x, a_trans.pos.y, b_trans.pos.x, b_trans.pos.y);
-    SDL_RenderDrawLine(m_renderer, b_trans.pos.x, b_trans.pos.y, c_trans.pos.x, c_trans.pos.y);
-    SDL_RenderDrawLine(m_renderer, c_trans.pos.x, c_trans.pos.y, a_trans.pos.x, a_trans.pos.y);*/
-    rasterize(a_trans, b_trans, c_trans);
-}
 
 float Renderer::cal_delta_time() {
     float delta_time;

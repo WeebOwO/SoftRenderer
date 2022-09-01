@@ -1,6 +1,7 @@
-﻿#include "shader.h"
+﻿
+#include "shader.h"
 #include "renderer.h"
-
+#include "math.h"
 //extern WindowCreaterInfo window_info;
 
 Light light({ 0.0f, 0.0f, 0.0f }, {1.0f, 1.0f, 1.0f});
@@ -19,8 +20,8 @@ Vertex vs_shader(Vertex a) {
     //计算漫反射光和环境光
     float diffuse_intensity = Max(vector_dot(a.normal, vector_normalize(light.light_pos - pos.xyz())), 0.f);
     Vec3f diffuse_color = diffuse_intensity * light.light_color;
-    Vec3f amibinet_color = 0.05f * light.light_color;
-    Vec3f color = (diffuse_color + amibinet_color) * light.light_color;
+    Vec3f amibinet_color = 0.2f * light.light_color;
+    Vec3f color = diffuse_color + amibinet_color;
     color.r = Min(1.0f, color.r);
     color.g = Min(1.0f, color.g);
     color.b = Min(1.0f, color.b);
@@ -31,6 +32,11 @@ Vertex vs_shader(Vertex a) {
     temp.pos = pos.xyz();
     temp.color = a.color * color;
     return temp;
+}
+
+Fragment fs_shader(Fragment b) {
+
+    return Fragment();
 }
 
 ShaderContext* ShaderContext::get_instance() {
