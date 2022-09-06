@@ -1,13 +1,10 @@
 ﻿#pragma once
 #include <cmath>
-#include <utility>
-#include <initializer_list>
 #include <algorithm>
 #include <chrono>
-#include <format>
 #include <memory>
 #include <vector>
-
+#include <array>
 #include <SDL.h>
 
 #include "math.h"
@@ -29,15 +26,15 @@ private:
     std::vector<std::vector<float>> m_depth_buffer;
     std::chrono::steady_clock::time_point m_last_tick_time_point{ std::chrono::steady_clock::now() };
 private:
-    void tickrender(float delta_time, const Buffer& buffer);
-    void draw_primitive(const Vertex& a, const Vertex& b, const Vertex& c);
-    float cal_delta_time();
+    void TickRenderer(float delta_time, const Buffer& buffer);
+    void DrawPrimitive(const Vertex& a, const Vertex& b, const Vertex& c);
+    float GetDeltaTime();
 
 public:
     Renderer() = default;
     Renderer(const WindowCreaterInfo& window_info, Shader* shader);
     ~Renderer();
-    void run(const Buffer& buffer);
-    inline void set_color(Uint8 r, Uint8 g, Uint8 b, Uint8 a) const {  SDL_SetRenderDrawColor(m_renderer, r, g, b, a); }
-    void render_clear();
+    void Run(const Buffer& buffer);
+    void SetColor(const Vec4f& color);
+    void RenderClear();
 };

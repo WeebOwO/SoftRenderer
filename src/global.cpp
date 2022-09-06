@@ -1,5 +1,5 @@
 #include "global.h"
 
 namespace global_context {
-    ShaderContext* shader_context = ShaderContext::get_instance();
+    ShaderContext* shader_context = ShaderContext::GetInstance();
 }

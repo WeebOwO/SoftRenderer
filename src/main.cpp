@@ -1,6 +1,6 @@
 ﻿#include "renderer.h"
 
-extern Vertex vs_shader(Vertex a);
+extern ShaderVaryingData vs_shader(Vertex a);
 extern Fragment fs_shader(Fragment a);
 
 std::vector<Vertex> vertex_buffer = {
@@ -76,11 +76,12 @@ WindowCreaterInfo window_info = {
 
 int main(int argc, char* argv[]) {
     //着色器设置
-    Shader shader(vs_shader, fs_shader);
+    Shader shader;
+    shader.SetVertexShader(vs_shader);
     //各种缓冲区设置
     Buffer buffer(vertex_buffer, index_buffer);
     //渲染器启动
     Renderer renderer(window_info, &shader);
-    renderer.run(buffer);
+    renderer.Run(buffer);
     return 0;
 } 
