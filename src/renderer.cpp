@@ -1,7 +1,30 @@
 ﻿#include <algorithm>
 #include <cmath>
-
 #include "renderer.h"
+
+namespace utils {
+    void BarycentricInterplate(ShaderVaryingData& output, const std::array<ShaderVaryingData, 3>& vertex_array, const Vec3f& barycentric) {
+        Vec3f sreen_coord_a = vertex_array[0].scrren_coord, sreen_coord_b = vertex_array[1].scrren_coord, sreen_coord_c = vertex_array[2].scrren_coord;
+        float z = 1 / (barycentric.x * (1 / sreen_coord_a.z) + barycentric.y * (1 / sreen_coord_b.z) + barycentric.z * (1 / sreen_coord_c.z));
+        float a_trans_inverse_z = 1 / sreen_coord_a.z, b_trans_inverse_z = 1 / sreen_coord_b.z, c_trans_inverse_z = 1 / sreen_coord_c.z;
+        // 颜色属性插值
+        float r = (z * (barycentric.x * vertex_array[0].color.r * a_trans_inverse_z + barycentric.y * vertex_array[1].color.r * b_trans_inverse_z + barycentric.z * vertex_array[2].color.r * c_trans_inverse_z));
+        float g = (z * (barycentric.x * vertex_array[0].color.g * a_trans_inverse_z + barycentric.y * vertex_array[1].color.g * b_trans_inverse_z + barycentric.z * vertex_array[2].color.g * c_trans_inverse_z));
+        float b = (z * (barycentric.x * vertex_array[0].color.b * a_trans_inverse_z + barycentric.y * vertex_array[1].color.b * b_trans_inverse_z + barycentric.z * vertex_array[2].color.b * c_trans_inverse_z));
+        output.color = Vec3f(r, g, b);
+        // 世界坐标插值
+        float world_x = (z * (barycentric.x * vertex_array[0].world_pos.x * a_trans_inverse_z + barycentric.y * vertex_array[1].world_pos.x * b_trans_inverse_z + barycentric.z * vertex_array[2].world_pos.x * c_trans_inverse_z));
+        float world_y = (z * (barycentric.x * vertex_array[0].world_pos.y * a_trans_inverse_z + barycentric.y * vertex_array[1].world_pos.y * b_trans_inverse_z + barycentric.z * vertex_array[2].world_pos.y * c_trans_inverse_z));
+        float world_z = (z * (barycentric.x * vertex_array[0].world_pos.z * a_trans_inverse_z + barycentric.y * vertex_array[1].world_pos.z * b_trans_inverse_z + barycentric.z * vertex_array[2].world_pos.z * c_trans_inverse_z));
+        output.world_pos = Vec3f(world_x, world_y, world_z);
+        // 法线坐标插值
+        float normal_x = (z * (barycentric.x * vertex_array[0].normal.x * a_trans_inverse_z + barycentric.y * vertex_array[1].normal.x * b_trans_inverse_z + barycentric.z * vertex_array[2].normal.x * c_trans_inverse_z));
+        float normal_y = (z * (barycentric.x * vertex_array[0].normal.y * a_trans_inverse_z + barycentric.y * vertex_array[1].normal.y * b_trans_inverse_z + barycentric.z * vertex_array[2].normal.y * c_trans_inverse_z));
+        float normal_z = (z * (barycentric.x * vertex_array[0].normal.z * a_trans_inverse_z + barycentric.y * vertex_array[1].normal.z * b_trans_inverse_z + barycentric.z * vertex_array[2].normal.z * c_trans_inverse_z));
+        output.normal = Vec3f(normal_x, normal_y, normal_z);
+    }
+}
+
 
 void Renderer::TickRenderer(float delta_time, const Buffer& buffer) {
     static float rotate_speed = 0.5f;
@@ -47,10 +70,11 @@ void Renderer::Run(const Buffer& buffer) {
 }
 
 void Renderer::SetColor(const Vec4f& color) {
-    uint8_t r = static_cast<uint8_t>(color.r * 255.0f);
-    uint8_t g = static_cast<uint8_t>(color.g * 255.0f);
-    uint8_t b = static_cast<uint8_t>(color.b * 255.0f);
-    uint8_t a = static_cast<uint8_t>(color.a * 255.0f);
+    Vec4f my_color = VectorClamp(color, 0.0f, 1.0f);
+    uint8_t r = static_cast<uint8_t>(my_color.r * 255.0f);
+    uint8_t g = static_cast<uint8_t>(my_color.g * 255.0f);
+    uint8_t b = static_cast<uint8_t>(my_color.b * 255.0f);
+    uint8_t a = static_cast<uint8_t>(my_color.a * 255.0f);
     SDL_SetRenderDrawColor(m_renderer, r, g, b, a);
 }
 
@@ -106,22 +130,20 @@ void Renderer::DrawPrimitive(const Vertex& a, const Vertex& b, const Vertex& c) 
                 //其根本原因是，对于深度来说，透视投影的变化对于深度(z)来说并非线性变化，所以投影过后的z值也不能简单的根据深度来进行插值
                 float z = 1 / (barycentric.x * (1 / sreen_coord_a.z) + barycentric.y * (1 / sreen_coord_b.z) + barycentric.z * (1 / sreen_coord_c.z));
                 //进行深度测试, early-z
-                if (y >= m_depth_buffer.size() || x >= m_depth_buffer[0].size() || m_depth_buffer[y][x] < z) continue;
+                if (y >= (int)m_depth_buffer.size() || x >= (int)m_depth_buffer[0].size() || m_depth_buffer[y][x] < z) continue;
                 m_depth_buffer[y][x] = z;
-                float a_trans_inverse_z = 1 / sreen_coord_a.z, b_trans_inverse_z = 1 / sreen_coord_b.z, c_trans_inverse_z = 1 / sreen_coord_c.z;
-                float r = (z * (barycentric.x * a_trans.color.r * a_trans_inverse_z + barycentric.y * b_trans.color.r * b_trans_inverse_z + barycentric.z * c_trans.color.r * c_trans_inverse_z));
-                float g = (z * (barycentric.x * a_trans.color.g * a_trans_inverse_z + barycentric.y * b_trans.color.g * b_trans_inverse_z + barycentric.z * c_trans.color.g * c_trans_inverse_z));
-                float b = (z * (barycentric.x * a_trans.color.b * a_trans_inverse_z + barycentric.y * b_trans.color.b * b_trans_inverse_z + barycentric.z * c_trans.color.b * c_trans_inverse_z));
-                SetColor(Vec4f(r, g, b, 1.0f));
+                ShaderVaryingData fragment;
+                utils::BarycentricInterplate(fragment, varying_data_array, barycentric);
+                Vec4f color = m_shader->RunFragmentShader(fragment);
+                SetColor(color);
                 SDL_RenderDrawPoint(m_renderer, x, y);
             }
         }
-    }
+    } 
 }
 
-
 float Renderer::GetDeltaTime() {
-    float delta_time;
+    float delta_time; 
     {
         using namespace std::chrono;
         steady_clock::time_point tick_time_point = steady_clock::now();

@@ -6,8 +6,6 @@
 #include "math.h"
 #include "light.h"
 
-
-
 struct Vertex {
     Vec3f pos;
     Vec3f normal;

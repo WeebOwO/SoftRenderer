@@ -1,10 +1,10 @@
 ﻿#include "renderer.h"
 
-extern ShaderVaryingData vs_shader(Vertex a);
-extern Fragment fs_shader(Fragment a);
+extern ShaderVaryingData MyVertexShader(Vertex a);
+extern Vec4f MyFragmentShader(const ShaderVaryingData& input);
 
 std::vector<Vertex> vertex_buffer = {
-    //齐次坐标                //颜色rgb
+    //齐次坐标                //法线               //颜色rgb
     {{-0.5f, -0.5f, -0.5f}, {0.0f,  0.0f, -1.0f}, {1.0f, 0.5f, 0.31f}},
     {{ 0.5f, -0.5f, -0.5f}, {0.0f,  0.0f, -1.0f},{1.0f, 0.5f, 0.31f}},
     {{0.5f,  0.5f, -0.5f}, {0.0f,  0.0f, -1.0f},{1.0f, 0.5f, 0.31f}},
@@ -77,7 +77,8 @@ WindowCreaterInfo window_info = {
 int main(int argc, char* argv[]) {
     //着色器设置
     Shader shader;
-    shader.SetVertexShader(vs_shader);
+    shader.SetVertexShader(MyVertexShader);
+    shader.SetFragmentShader(MyFragmentShader);
     //各种缓冲区设置
     Buffer buffer(vertex_buffer, index_buffer);
     //渲染器启动
