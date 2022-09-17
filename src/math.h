@@ -623,7 +623,7 @@ inline Matrix<N, N, T> MatrixAdjoint(const Matrix<N, N, T>& m) {
 
 // 求逆矩阵：使用伴随矩阵除以行列式的值得到
 template<size_t N, typename T>
-inline Matrix<N, N, T> matrix_invert(const Matrix<N, N, T>& m) {
+inline Matrix<N, N, T> MatrixInvert(const Matrix<N, N, T>& m) {
 	Matrix<N, N, T> ret = MatrixAdjoint(m);
 	T det = VectorDot(m.Row(0), ret.Col(0));
 	return ret / det;

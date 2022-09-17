@@ -4,7 +4,7 @@ extern ShaderVaryingData MyVertexShader(Vertex a);
 extern Vec4f MyFragmentShader(const ShaderVaryingData& input);
 
 std::vector<Vertex> vertex_buffer = {
-    //齐次坐标                //法线               //颜色rgb
+    //坐标                //法线               //颜色rgb
     {{-0.5f, -0.5f, -0.5f}, {0.0f,  0.0f, -1.0f}, {1.0f, 0.5f, 0.31f}},
     {{ 0.5f, -0.5f, -0.5f}, {0.0f,  0.0f, -1.0f},{1.0f, 0.5f, 0.31f}},
     {{0.5f,  0.5f, -0.5f}, {0.0f,  0.0f, -1.0f},{1.0f, 0.5f, 0.31f}},

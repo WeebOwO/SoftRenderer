@@ -19,7 +19,7 @@ Vec4f MyFragmentShader(const ShaderVaryingData& input) {
     Vec3f world_pos = input.world_pos, normal = input.normal;
     Vec3f light_pos = light.light_pos, light_color = light.light_color;
     Vec3f lightdir = VectorNormalize(light_pos - world_pos);
-    float diffuse_intensity = 0.5f * Max(VectorDot(normal, lightdir), 0.0f);
+    float diffuse_intensity = 0.8f * Max(VectorDot(normal, lightdir), 0.0f);
     float ambient_instensity = 0.2f;
     Vec3f color = (diffuse_intensity + ambient_instensity) * light_color * input.color;
     return color.xyz1();

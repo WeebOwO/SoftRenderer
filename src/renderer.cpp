@@ -39,7 +39,7 @@ void Renderer::TickRenderer(float delta_time, const Buffer& buffer) {
     Mat4x4f offset = MatrixSetTranslate(0, 0, 2.5);
     Mat4x4f rotate = MatrixSetRotate(1, 1, 0, angle);
     Mat4x4f model = rotate * offset;
-    Mat4x4f normal_mat = matrix_invert(model).Transpose();
+    Mat4x4f normal_mat = MatrixInvert(model).Transpose();
     Mat4x4f look_at = MatrixSetLookat({ 0, 0, -1 }, { 0, 0, 0 }, { 0, 1, 0 });
     Mat4x4f projection = MatrixSetPerspective(3.1415926f * 0.35f, 1.0f, 1.0f, 10.0f);
     Mat4x4f viewport = MatrixSetViewport(600, 600);
@@ -88,7 +88,7 @@ void Renderer::RenderClear() {
 
 void Renderer::DrawPrimitive(const Vertex& a, const Vertex& b, const Vertex& c) {
     ShaderVaryingData a_trans = m_shader->RunVertexShader(a), b_trans = m_shader->RunVertexShader(b), c_trans = m_shader->RunVertexShader(c);
-    //齐次坐标裁剪,超出范围的话直接舍弃整个三角形
+    // 齐次坐标裁剪,超出范围的话直接舍弃整个三角形
     std::array<ShaderVaryingData, 3> varying_data_array { a_trans, b_trans, c_trans };
     for(auto&& data : varying_data_array) {
         float x = data.homogeneous_coord.x;
@@ -101,7 +101,7 @@ void Renderer::DrawPrimitive(const Vertex& a, const Vertex& b, const Vertex& c) 
         if (y < -w || y > w) return;
     }
 
-    //透视除法转换为欧式坐标, 然后再通过视口变化转换到屏幕坐标系
+    // 透视除法转换为欧式坐标, 然后再通过视口变化转换到屏幕坐标系
     for (auto&& data : varying_data_array) {
         float reverse_w = 1.0f / data.homogeneous_coord.w;
         data.homogeneous_coord.x *= reverse_w;
@@ -120,16 +120,16 @@ void Renderer::DrawPrimitive(const Vertex& a, const Vertex& b, const Vertex& c) 
 
     for (int x = min_x; x <= max_x; ++x) {
         for (int y = min_y; y <= max_y; ++y) {
-            //用重心坐标来判断当前点是不是在三角形内, https://zhuanlan.zhihu.com/p/65495373参考证明资料
+            // 用重心坐标来判断当前点是不是在三角形内, https://zhuanlan.zhihu.com/p/65495373参考证明资料
             Vec3f x_part(sreen_coord_b.x - sreen_coord_a.x, sreen_coord_c.x - sreen_coord_a.x, sreen_coord_a.x - x);
             Vec3f y_part(sreen_coord_b.y - sreen_coord_a.y, sreen_coord_c.y - sreen_coord_a.y, sreen_coord_a.y - y);
             Vec3f u_part = VectorCross(x_part, y_part);
             Vec3f barycentric(1.0f - (u_part.x + u_part.y) / u_part.z, u_part.x / u_part.z, u_part.y / u_part.z);
             if (barycentric.x >= 0 && barycentric.y >= 0 && barycentric.z >= 0) {
-                //通过正确的深度来计算插值, 因为屏幕空间下直接利用重心坐标系的结果是不符合在观察坐标系的所看到的深度
-                //其根本原因是，对于深度来说，透视投影的变化对于深度(z)来说并非线性变化，所以投影过后的z值也不能简单的根据深度来进行插值
+                // 通过正确的深度来计算插值, 因为屏幕空间下直接利用重心坐标系的结果是不符合在观察坐标系的所看到的深度
+                // 其根本原因是，对于深度来说，透视投影的变化对于深度(z)来说并非线性变化，所以投影过后的z值也不能简单的根据深度来进行插值
                 float z = 1 / (barycentric.x * (1 / sreen_coord_a.z) + barycentric.y * (1 / sreen_coord_b.z) + barycentric.z * (1 / sreen_coord_c.z));
-                //进行深度测试, early-z
+                // 进行深度测试, early-z, 未通过深度测试的片元则被丢弃
                 if (y >= (int)m_depth_buffer.size() || x >= (int)m_depth_buffer[0].size() || m_depth_buffer[y][x] < z) continue;
                 m_depth_buffer[y][x] = z;
                 ShaderVaryingData fragment;
