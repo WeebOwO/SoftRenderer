@@ -1,3 +1,4 @@
-cmake-build-debug/*
-.idea/*
-dependency/*
+/dependency/
+/cmake-build-default-visual-studio/
+/cmake-build-release/
+/cmake-build-release-visual-studio/
