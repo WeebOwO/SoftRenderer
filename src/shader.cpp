@@ -1,7 +1,8 @@
 ﻿#include "shader.h"
 #include "global.h"
 
-Light light({ 0.0f, 0.0f, 0.0f }, {1.0f, 1.0f, 1.0f});
+static Vec3f light_pos = { 0.0f, 0.0f, 0.0f};
+static Vec3f light_color = {1.0f, 1.0f, 1.0f};
 
 ShaderVaryingData MyVertexShader(Vertex a) {
     Mat4x4f model = global_context::shader_context->GetModelMatrix();
@@ -17,7 +18,6 @@ ShaderVaryingData MyVertexShader(Vertex a) {
 
 Vec4f MyFragmentShader(const ShaderVaryingData& input) {
     Vec3f world_pos = input.world_pos, normal = input.normal;
-    Vec3f light_pos = light.light_pos, light_color = light.light_color;
     Vec3f lightdir = VectorNormalize(light_pos - world_pos);
     float diffuse_intensity = 0.8f * Max(VectorDot(normal, lightdir), 0.0f);
     float ambient_instensity = 0.2f;

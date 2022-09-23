@@ -71,10 +71,10 @@ void Renderer::Run(const Buffer& buffer) {
 
 void Renderer::SetColor(const Vec4f& color) {
     Vec4f my_color = VectorClamp(color, 0.0f, 1.0f);
-    uint8_t r = static_cast<uint8_t>(my_color.r * 255.0f);
-    uint8_t g = static_cast<uint8_t>(my_color.g * 255.0f);
-    uint8_t b = static_cast<uint8_t>(my_color.b * 255.0f);
-    uint8_t a = static_cast<uint8_t>(my_color.a * 255.0f);
+    auto r = static_cast<uint8_t>(my_color.r * 255.0f);
+    auto g = static_cast<uint8_t>(my_color.g * 255.0f);
+    auto b = static_cast<uint8_t>(my_color.b * 255.0f);
+    auto a = static_cast<uint8_t>(my_color.a * 255.0f);
     SDL_SetRenderDrawColor(m_renderer, r, g, b, a);
 }
 

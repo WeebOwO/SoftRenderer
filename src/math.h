@@ -1,9 +1,9 @@
 ﻿#pragma once
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
-#include <math.h>
-#include <assert.h>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <cmath>
+#include <cassert>
 
 #include <vector>
 #include <map>

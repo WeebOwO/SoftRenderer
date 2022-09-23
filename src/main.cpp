@@ -80,7 +80,9 @@ int main(int argc, char* argv[]) {
     shader.SetVertexShader(MyVertexShader);
     shader.SetFragmentShader(MyFragmentShader);
     //各种缓冲区设置
-    Buffer buffer(vertex_buffer, index_buffer);
+    Buffer buffer;
+    buffer.verter_buffer = vertex_buffer;
+    buffer.index_buffer = index_buffer;
     //渲染器启动
     Renderer renderer(window_info, &shader);
     renderer.Run(buffer);
