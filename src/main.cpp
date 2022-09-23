@@ -1,7 +1,7 @@
 ﻿#include "renderer.h"
 
-extern ShaderVaryingData MyVertexShader(Vertex a);
-extern Vec4f MyFragmentShader(const ShaderVaryingData& input);
+extern ShaderVaryingData MyVertexShader(const Vertex& input_vertex);
+extern Vec4f MyFragmentShader(const ShaderVaryingData& input_shader_varying_data);
 
 std::vector<Vertex> vertex_buffer = {
     //坐标                //法线               //颜色rgb

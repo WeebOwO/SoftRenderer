@@ -4,7 +4,7 @@
 static Vec3f light_pos = { 0.0f, 0.0f, 0.0f};
 static Vec3f light_color = {1.0f, 1.0f, 1.0f};
 
-ShaderVaryingData MyVertexShader(Vertex a) {
+ShaderVaryingData MyVertexShader(const Vertex& a) {
     Mat4x4f model = global_context::shader_context->GetModelMatrix();
     Mat4x4f normal_model = global_context::shader_context->GetNormalMatrix();
     Mat4x4f transform = global_context::shader_context->GetTransformMatrix();
@@ -18,8 +18,8 @@ ShaderVaryingData MyVertexShader(Vertex a) {
 
 Vec4f MyFragmentShader(const ShaderVaryingData& input) {
     Vec3f world_pos = input.world_pos, normal = input.normal;
-    Vec3f lightdir = VectorNormalize(light_pos - world_pos);
-    float diffuse_intensity = 0.8f * Max(VectorDot(normal, lightdir), 0.0f);
+    Vec3f light_dir = VectorNormalize(light_pos - world_pos);
+    float diffuse_intensity = 0.8f * Max(VectorDot(normal, light_dir), 0.0f);
     float ambient_instensity = 0.2f;
     Vec3f color = (diffuse_intensity + ambient_instensity) * light_color * input.color;
     return color.xyz1();
