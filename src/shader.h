@@ -1,8 +1,8 @@
 ﻿#pragma once
 #include <functional>
 #include <memory>
-
 #include <SDL.h>
+
 #include "math.h"
 #include "light.h"
 

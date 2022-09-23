@@ -147,7 +147,7 @@ float Renderer::GetDeltaTime() {
     {
         using namespace std::chrono;
         steady_clock::time_point tick_time_point = steady_clock::now();
-        duration<float> time_span = duration_cast<duration<float>>(tick_time_point - m_last_tick_time_point);
+        auto time_span = duration_cast<duration<float>>(tick_time_point - m_last_tick_time_point);
         delta_time = time_span.count();
         m_last_tick_time_point = tick_time_point;
     }
