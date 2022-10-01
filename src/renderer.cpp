@@ -7,24 +7,24 @@ namespace utils {
         Vec3f sreen_coord_a = vertex_array[0].scrren_coord, sreen_coord_b = vertex_array[1].scrren_coord, sreen_coord_c = vertex_array[2].scrren_coord;
         float z = 1 / (barycentric.x * (1 / sreen_coord_a.z) + barycentric.y * (1 / sreen_coord_b.z) + barycentric.z * (1 / sreen_coord_c.z));
         float a_trans_inverse_z = 1 / sreen_coord_a.z, b_trans_inverse_z = 1 / sreen_coord_b.z, c_trans_inverse_z = 1 / sreen_coord_c.z;
+        float a_part = a_trans_inverse_z * barycentric.x, b_part = b_trans_inverse_z * barycentric.y, c_part = c_trans_inverse_z * barycentric.z;
         // 颜色属性插值
-        float r = (z * (barycentric.x * vertex_array[0].color.r * a_trans_inverse_z + barycentric.y * vertex_array[1].color.r * b_trans_inverse_z + barycentric.z * vertex_array[2].color.r * c_trans_inverse_z));
-        float g = (z * (barycentric.x * vertex_array[0].color.g * a_trans_inverse_z + barycentric.y * vertex_array[1].color.g * b_trans_inverse_z + barycentric.z * vertex_array[2].color.g * c_trans_inverse_z));
-        float b = (z * (barycentric.x * vertex_array[0].color.b * a_trans_inverse_z + barycentric.y * vertex_array[1].color.b * b_trans_inverse_z + barycentric.z * vertex_array[2].color.b * c_trans_inverse_z));
+        float r = z * (a_part * vertex_array[0].color.r  + b_part * vertex_array[1].color.r +  c_part * vertex_array[2].color.r);
+        float g = z * (a_part * vertex_array[0].color.g  + b_part * vertex_array[1].color.g +  c_part * vertex_array[2].color.g);
+        float b = z * (a_part * vertex_array[0].color.b  + b_part * vertex_array[1].color.b +  c_part * vertex_array[2].color.b);
         output.color = Vec3f(r, g, b);
         // 世界坐标插值
-        float world_x = (z * (barycentric.x * vertex_array[0].world_pos.x * a_trans_inverse_z + barycentric.y * vertex_array[1].world_pos.x * b_trans_inverse_z + barycentric.z * vertex_array[2].world_pos.x * c_trans_inverse_z));
-        float world_y = (z * (barycentric.x * vertex_array[0].world_pos.y * a_trans_inverse_z + barycentric.y * vertex_array[1].world_pos.y * b_trans_inverse_z + barycentric.z * vertex_array[2].world_pos.y * c_trans_inverse_z));
-        float world_z = (z * (barycentric.x * vertex_array[0].world_pos.z * a_trans_inverse_z + barycentric.y * vertex_array[1].world_pos.z * b_trans_inverse_z + barycentric.z * vertex_array[2].world_pos.z * c_trans_inverse_z));
+        float world_x = z * (a_part * vertex_array[0].world_pos.x + b_part * vertex_array[1].world_pos.x + c_part * vertex_array[2].world_pos.x);
+        float world_y = z * (a_part * vertex_array[0].world_pos.y + b_part * vertex_array[1].world_pos.y + c_part * vertex_array[2].world_pos.y);
+        float world_z = z * (a_part * vertex_array[0].world_pos.z + b_part * vertex_array[1].world_pos.z + c_part * vertex_array[2].world_pos.z);
         output.world_pos = Vec3f(world_x, world_y, world_z);
         // 法线坐标插值
-        float normal_x = (z * (barycentric.x * vertex_array[0].normal.x * a_trans_inverse_z + barycentric.y * vertex_array[1].normal.x * b_trans_inverse_z + barycentric.z * vertex_array[2].normal.x * c_trans_inverse_z));
-        float normal_y = (z * (barycentric.x * vertex_array[0].normal.y * a_trans_inverse_z + barycentric.y * vertex_array[1].normal.y * b_trans_inverse_z + barycentric.z * vertex_array[2].normal.y * c_trans_inverse_z));
-        float normal_z = (z * (barycentric.x * vertex_array[0].normal.z * a_trans_inverse_z + barycentric.y * vertex_array[1].normal.z * b_trans_inverse_z + barycentric.z * vertex_array[2].normal.z * c_trans_inverse_z));
+        float normal_x = z * (a_part * vertex_array[0].normal.x  + b_part * vertex_array[1].normal.x + c_part * vertex_array[2].normal.x);
+        float normal_y = z * (a_part * vertex_array[0].normal.y  + b_part * vertex_array[1].normal.y + c_part * vertex_array[2].normal.y);
+        float normal_z = z * (a_part * vertex_array[0].normal.z  + b_part * vertex_array[1].normal.z + c_part * vertex_array[2].normal.z);
         output.normal = Vec3f(normal_x, normal_y, normal_z);
     }
 }
-
 
 void Renderer::TickRenderer(float delta_time, const Buffer& buffer) {
     static float rotate_speed = 0.5f;
@@ -111,7 +111,6 @@ void Renderer::DrawPrimitive(const Vertex& a, const Vertex& b, const Vertex& c) 
         data.scrren_coord = (data.homogeneous_coord * global_context::shader_context->GetViewPortMatrix()).xyz();
     }
     //求出三角形的AABB包围盒
-    
     Vec3f sreen_coord_a = varying_data_array[0].scrren_coord, sreen_coord_b = varying_data_array[1].scrren_coord, sreen_coord_c = varying_data_array[2].scrren_coord;
     int min_x = static_cast<int>(std::min({ sreen_coord_a.x , sreen_coord_b.x, sreen_coord_c.x }));
     int min_y = static_cast<int>(std::min({ sreen_coord_a.y , sreen_coord_b.y, sreen_coord_c.y }));

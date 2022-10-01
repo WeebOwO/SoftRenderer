@@ -6,7 +6,6 @@
 #include <vector>
 #include <array>
 #include <SDL.h>
-
 #include "math.h"
 #include "shader.h"
 #include "buffer.h"

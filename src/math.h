@@ -1,10 +1,4 @@
 ﻿#pragma once
-#include <cstddef>
-#include <cstdint>
-#include <cstring>
-#include <cmath>
-#include <cassert>
-
 #include <vector>
 #include <map>
 #include <initializer_list>
@@ -13,7 +7,11 @@
 #include <ostream>
 #include <sstream>
 #include <iostream>
-
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <cmath>
+#include <cassert>
 
 //---------------------------------------------------------------------
 // 数学库：矢量定义
