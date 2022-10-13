@@ -2,5 +2,5 @@
 #include "math.h"
 
 struct Light {
-    Vec3f light_pos, light_color;
+  Vec3f light_pos, light_color;
 };
