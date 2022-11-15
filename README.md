@@ -1,6 +1,5 @@
 # SoftRenderer
-在不使用图形API，像是OpenGL，DirectX，Vulcan的情况下，通过简单的画点函数和SDL2所提供的创建窗口功能来实现的简易软光栅渲染器
-
+ A simple renderer without graphic api like Vulcan, Directx and OpenGL. 
 ## 当前进度
   ### 1. Rasterize triangle
   ![](/asset/Triangle.png)
