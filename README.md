@@ -1,12 +1,22 @@
 # SoftRenderer
  A simple renderer without graphic api like Vulcan, Directx and OpenGL. 
-## 当前进度
-  ### 1. Rasterize triangle
-  ![](/asset/Triangle.png)
+## Dependency
+SDL2 for create window and draw point, you need to link that youself and change setting in CMakeLists.txt in line4 and line5.
+``` cmake
+ include_directories(dependency/SDL2-2.24.0/include/)
+ link_directories(dependency/SDL2-2.24.0/lib/x86)
+```
 
-  ### 2. Z-buffer for rotate cube
-  ![](/asset/depth_buffer.gif)
-  
-  ### 3. Basic lighting
-  ![](/asset/mylight.gif)
+## Build
+you need cmake and c++ compiler. And having those tools. You can run commands below to build this project.
 
+```
+ mkdir build
+ cd build
+ cmake ..
+```
+
+## Running example
+<div>
+<img src="asset/mylight.gif">
+</div>
