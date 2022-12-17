@@ -7,9 +7,15 @@
 
 // Test data
 static std::vector<Vec3f> position = {
-    {0.0f, 0.7f, 0.0f}, {-0.6f, -0.2f, 0.0f}, {0.6f, -0.2f, 0.0f}};
+    {0.0f, 0.7f, 0.0f},
+    {-0.6f, -0.2f, 0.0f},
+    {0.6f, -0.2f, 0.0f}
+};
 static std::vector<Vec4f> color = {
-    {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}};
+    {1.0f, 0.0f, 0.0f, 1.0f},
+    {0.0f, 1.0f, 0.0f, 1.0f},
+    {0.0f, 0.0f, 1.0f, 1.0f}
+};
 static std::vector<std::array<int, 3>> index_buffer = {{0, 1, 2}};
 
 Vec4f SimpleVertexShader(int index, ShaderContext& output) {
