@@ -1,5 +1,3 @@
-/.idea/
-/dependency/
-/cmake-build-default-visual-studio/
-/cmake-build-release/
-/cmake-build-release-visual-studio/
+.idea/
+cmake-build-release/
+cmake-build-debug/

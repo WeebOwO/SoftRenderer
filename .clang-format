@@ -1,1 +1,8 @@
 BasedOnStyle: Google
+Language: Cpp
+
+AllowShortBlocksOnASingleLine: Always
+AllowShortIfStatementsOnASingleLine: Always
+AllowShortLambdasOnASingleLine: All
+UseTab: Never
+ColumnLimit: 100
