@@ -1,18 +1,21 @@
+#include "render_system.h"
+
+#include <SDL2/SDL.h>
+
 #include <array>
 #include <iostream>
-#include "render_system.h"
+
 #include "runtime_context.h"
 #include "shader.h"
-#include <SDL2/SDL.h>
 
 void Renderer::RenderWithContext(const RuntimeContext& context) {
   RenderClear();
   const auto& faces = context.model_info_.faces_;
   const auto& pos = context.model_info_.pos_;
   static std::array<Vertex, 3> vertices;
-  for(const auto& face : faces) {
+  for (const auto& face : faces) {
     int min_x, max_x, min_y, max_y;
-    for(int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; ++i) {
       vertices[i].context_.Clear();
       // 运行Vertex Shader
       vertices[i].pos_ = context.vertex_shader_(face[i], vertices[i].context_);
@@ -27,7 +30,7 @@ void Renderer::RenderWithContext(const RuntimeContext& context) {
       vertices[i].spi_.x = static_cast<int>(vertices[i].spf_.x + 0.5f);
       vertices[i].spi_.y = static_cast<int>(vertices[i].spf_.y + 0.5f);
 
-      if(i == 0) {
+      if (i == 0) {
         // 初始化
         min_x = max_x = Between(0, width - 1, vertices[i].spi_.x);
         min_y = max_y = Between(0, height - 1, vertices[i].spi_.y);
@@ -39,30 +42,28 @@ void Renderer::RenderWithContext(const RuntimeContext& context) {
       }
     }
     // 对cache友好一点
-    for(int y = min_y; y <= max_y; ++y) {
-      for(int x = min_x; x <= max_x; ++x) {
+    for (int y = min_y; y <= max_y; ++y) {
+      for (int x = min_x; x <= max_x; ++x) {
         // 利用重心坐标法来判断点是不是在三角形内
         // https://zhuanlan.zhihu.com/p/65495373 参考证明资料
         float px = static_cast<float>(x + 0.5f);
         float py = static_cast<float>(y + 0.5f);
         Vec3f x_part(vertices[1].spf_.x - vertices[0].spf_.x,
-                     vertices[2].spf_.x - vertices[0].spf_.x,
-                     vertices[0].spf_.x - px);
+                     vertices[2].spf_.x - vertices[0].spf_.x, vertices[0].spf_.x - px);
         Vec3f y_part(vertices[1].spf_.y - vertices[0].spf_.y,
-                     vertices[2].spf_.y - vertices[0].spf_.y,
-                     vertices[0].spf_.y - py);
+                     vertices[2].spf_.y - vertices[0].spf_.y, vertices[0].spf_.y - py);
 
         Vec3f u_part = vector_cross(x_part, y_part);
-        Vec3f barycentric(1.0f - (u_part.x + u_part.y) / u_part.z,
-                          u_part.x / u_part.z, u_part.y / u_part.z);
+        Vec3f barycentric(1.0f - (u_part.x + u_part.y) / u_part.z, u_part.x / u_part.z,
+                          u_part.y / u_part.z);
 
-        if(barycentric.x >= 0 && barycentric.y >= 0 && barycentric.z >= 0) {
-          std::array<float, 3> interplate_factor {barycentric.x, barycentric.y, barycentric.z};
+        if (barycentric.x >= 0 && barycentric.y >= 0 && barycentric.z >= 0) {
+          std::array<float, 3> interplate_factor{barycentric.x, barycentric.y, barycentric.z};
           ShaderContext input;
           ShaderContext& s0 = vertices[0].context_;
           ShaderContext& s1 = vertices[1].context_;
           ShaderContext& s2 = vertices[2].context_;
-          for(const auto& [key, value] : s0.varying_vec4f) {
+          for (const auto& [key, value] : s0.varying_vec4f) {
             Vec4f factor_0 = value * interplate_factor[0];
             Vec4f factor_1 = s1.varying_vec4f[key] * interplate_factor[1];
             Vec4f factor_2 = s2.varying_vec4f[key] * interplate_factor[2];
@@ -78,9 +79,7 @@ void Renderer::RenderWithContext(const RuntimeContext& context) {
   RenderPresent();
 }
 
-void Renderer::RenderPresent() {
-  SDL_RenderPresent(m_renderer_);
-}
+void Renderer::RenderPresent() { SDL_RenderPresent(m_renderer_); }
 
 Renderer::Renderer(const WindowInfo& window_info) {
   SDL_CreateWindowAndRenderer(window_info.width_, window_info.height_, SDL_WINDOW_RESIZABLE,

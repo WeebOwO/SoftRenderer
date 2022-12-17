@@ -759,16 +759,14 @@ inline static uint32_t vector_to_color(const Vec4f& color) {
 }
 
 // 矢量转换整数颜色
-inline static uint32_t vector_to_color(const Vec3f& color) {
-  return vector_to_color(color.xyz1());
-}
+inline static uint32_t vector_to_color(const Vec3f& color) { return vector_to_color(color.xyz1()); }
 
 // 整数颜色到矢量
 inline static Vec4f vector_from_color(uint32_t rgba) {
   Vec4f out;
   out.r = ((rgba >> 16) & 0xff) / 255.0f;
-  out.g = ((rgba >>  8) & 0xff) / 255.0f;
-  out.b = ((rgba >>  0) & 0xff) / 255.0f;
+  out.g = ((rgba >> 8) & 0xff) / 255.0f;
+  out.b = ((rgba >> 0) & 0xff) / 255.0f;
   out.a = ((rgba >> 24) & 0xff) / 255.0f;
   return out;
 }
@@ -850,7 +848,6 @@ inline static Mat4x4f matrix_set_lookat(const Vec3f& eye, const Vec3f& at, const
   return m;
 }
 
-
 // D3DXMatrixPerspectiveFovLH
 inline static Mat4x4f matrix_set_perspective(float fovy, float aspect, float zn, float zf) {
   float fax = 1.0f / (float)tan(fovy * 0.5f);
@@ -858,18 +855,7 @@ inline static Mat4x4f matrix_set_perspective(float fovy, float aspect, float zn,
   m.m[0][0] = (float)(fax / aspect);
   m.m[1][1] = (float)(fax);
   m.m[2][2] = zf / (zf - zn);
-  m.m[3][2] = - zn * zf / (zf - zn);
+  m.m[3][2] = -zn * zf / (zf - zn);
   m.m[2][3] = 1;
-  return m;
-}
-
-inline static Mat4x4f matrix_set_viewport(int width, int height) {
-  Mat4x4f m = matrix_set_zero();
-  m.m[0][0] = width / 2.0f;
-  m.m[1][1] = -height / 2.0f;
-  m.m[3][0] = width / 2.0f;
-  m.m[3][1] = height / 2.0f;
-  m.m[2][2] = 1.0f;
-  m.m[3][3] = 1.0f;
   return m;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+
 #include "math.h"
 
 class SDL_Renderer;
@@ -25,6 +26,7 @@ class Renderer {
   Renderer() = delete;
   Renderer(const WindowInfo& window_info);
   ~Renderer();
+
  private:
   // 只是用来管理窗口和使用画点api
   SDL_Renderer* m_renderer_{nullptr};

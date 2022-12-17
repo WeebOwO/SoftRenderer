@@ -1,8 +1,9 @@
 #pragma once
 
+#include <array>
 #include <memory>
 #include <vector>
-#include <array>
+
 #include "math.h"
 #include "shader.h"
 
@@ -18,6 +19,6 @@ class RuntimeContext {
  public:
   static RuntimeContext& GetInstance();
   ModelInfo model_info_;
-  VertexShader vertex_shader_ {nullptr};
-  PixelShader pixel_shader_ {nullptr};
+  VertexShader vertex_shader_{nullptr};
+  PixelShader pixel_shader_{nullptr};
 };
