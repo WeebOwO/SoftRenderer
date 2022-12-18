@@ -9,4 +9,4 @@ file(GLOB SRC_FILES
 "${PROJECT_SOURCE_DIR}/source/*.cpp")
 
 link_libraries(SDL2)
-add_executable(SoftRenderer ${SRC_FILES} source/shader.cpp)
+add_executable(SoftRenderer ${SRC_FILES})

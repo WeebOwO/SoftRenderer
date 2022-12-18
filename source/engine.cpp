@@ -3,7 +3,7 @@
 
 #include <SDL2/SDL.h>
 
-#include "render_system.h"
+#include "renderer.h"
 #include "runtime_context.h"
 
 void Application::Run() {
