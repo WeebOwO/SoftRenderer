@@ -10,7 +10,7 @@
 class SDL_Renderer;
 class SDL_Window;
 class SDL_Texture;
-class Scene;
+class scene;
 
 struct WindowInfo {
   const char* title_{"HardCore"};
@@ -22,7 +22,7 @@ struct WindowInfo {
 
 class Renderer {
  public:
-  void RenderScene(const Scene& scene);
+  void RenderScene(const scene& scene);
   void RenderPresent();
   void DrawPrimitive();
   void RenderClear();

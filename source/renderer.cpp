@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <execution>
 
-#include "Scene.h"
+#include "scene.h"
 static bool IsTopLeft(const Vec2i& a, const Vec2i& b) {
   return ((a.y == b.y) && (a.x < b.x)) || (a.y > b.y);
 }
@@ -52,7 +52,7 @@ ShaderContext Renderer::BarycentricInterplate(std::array<Vertex, 3>& vertices,
   }
   return ret;
 }
-void Renderer::RenderScene(const Scene& scene) { return; }
+void Renderer::RenderScene(const scene& scene) { return; }
 
 void Renderer::DrawPrimitive() {
   if(m_vertex_shader_ == nullptr || m_pixel_shader_ == nullptr) return;
