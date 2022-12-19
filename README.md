@@ -6,7 +6,7 @@ SDL2 for create window and draw point, you need to link that youself and change 
 ## Build
 you need cmake and c++ compiler. And having those tools. You can run commands below to build this project.
 
-```
+``` cmd
  mkdir build
  cd build
  cmake ..
