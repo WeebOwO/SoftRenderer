@@ -5,12 +5,7 @@
 
 #include "math.h"
 
-enum : size_t {
-  kColor = 0,
-};
-
-class ShaderContext {
- public:
+struct ShaderContext {
   std::unordered_map<int, float> varying_float;  // 浮点数 varying 列表
   std::unordered_map<int, Vec2f> varying_vec2f;  // 二维矢量 varying 列表
   std::unordered_map<int, Vec3f> varying_vec3f;  // 三维矢量 varying 列表
@@ -28,5 +23,3 @@ struct Vertex {
 
 using VertexShader = std::function<Vec4f(int index, ShaderContext& output)>;
 using PixelShader = std::function<Vec4f(ShaderContext& input)>;
-
-void ShaderContextClear(const ShaderContext& context);

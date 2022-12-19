@@ -1,12 +1,16 @@
 #pragma once
 
+#include <array>
 #include <unordered_map>
 
 #include "math.h"
+#include "shader.h"
+#include "bitmap.h"
 
 class SDL_Renderer;
 class SDL_Window;
-class RuntimeContext;
+class SDL_Texture;
+class Scene;
 
 struct WindowInfo {
   const char* title_{"HardCore"};
@@ -18,18 +22,33 @@ struct WindowInfo {
 
 class Renderer {
  public:
-  void RenderWithContext(const RuntimeContext& context);
+  void RenderScene(const Scene& scene);
   void RenderPresent();
+  void DrawPrimitive();
   void RenderClear();
-  void DrawPixel(int x, int y, Vec4f color);
+  void DrawPixel(int x, int y, const Vec4f& color);
+  void Resize(int width, int height);
   void ResizeDepthBuffer(int width, int height);
+  void ResizeFrameBuffer(int width, int height);
+  void SetVertexShader(VertexShader vertex_shader);
+  void SetPixelShader(PixelShader pixel_shader);
+  void Test();
   Renderer() = delete;
-  Renderer(const WindowInfo& window_info);
+  explicit Renderer(const WindowInfo& window_info);
   ~Renderer();
 
  private:
-  // 只是用来管理窗口和使用画点api
+  Vec3f GetBarycentric(const std::array<Vertex, 3>& vertices, float px, float py);
+  ShaderContext BarycentricInterplate(std::array<Vertex, 3>& vertices, const Vec3f& barycentric);
+
+ private:
+  // 只是用来管理窗口的运行环境
+  const int m_window_width_ {900}, m_window_height_ {600};
   SDL_Renderer* m_renderer_{nullptr};
   SDL_Window* m_window_{nullptr};
-  std::vector<float> depth_buffer_;
+  SDL_Texture* m_swap_texture_ {nullptr};
+  uint32_t m_frame_buffer_[900 * 600];
+  std::vector<float> m_depth_buffer_;
+  VertexShader m_vertex_shader_;
+  PixelShader m_pixel_shader_;
 };
