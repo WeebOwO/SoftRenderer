@@ -3,22 +3,10 @@
 #include <SDL2/SDL.h>
 
 #include <algorithm>
-#include <execution>
 
-#include "scene.h"
+
 static bool IsTopLeft(const Vec2i& a, const Vec2i& b) {
   return ((a.y == b.y) && (a.x < b.x)) || (a.y > b.y);
-}
-Vec3f Renderer::GetBarycentric(const std::array<Vertex, 3>& vertices, float px, float py) {
-  Vec3f x_part(vertices[1].spf_.x - vertices[0].spf_.x, vertices[2].spf_.x - vertices[0].spf_.x,
-               vertices[0].spf_.x - px);
-  Vec3f y_part(vertices[1].spf_.y - vertices[0].spf_.y, vertices[2].spf_.y - vertices[0].spf_.y,
-               vertices[0].spf_.y - py);
-
-  Vec3f u_part = vector_cross(x_part, y_part);
-  Vec3f barycentric(1.0f - (u_part.x + u_part.y) / u_part.z, u_part.x / u_part.z,
-                    u_part.y / u_part.z);
-  return barycentric;
 }
 
 ShaderContext Renderer::BarycentricInterplate(std::array<Vertex, 3>& vertices,
@@ -55,7 +43,7 @@ ShaderContext Renderer::BarycentricInterplate(std::array<Vertex, 3>& vertices,
 void Renderer::RenderScene(const scene& scene) { return; }
 
 void Renderer::DrawPrimitive() {
-  if(m_vertex_shader_ == nullptr || m_pixel_shader_ == nullptr) return;
+  if (m_vertex_shader_ == nullptr || m_pixel_shader_ == nullptr) return;
   static std::array<Vertex, 3> vertices;
   int width = m_window_width_, height = m_window_height_;
   int min_x, max_x, min_y, max_y;
@@ -99,17 +87,15 @@ void Renderer::DrawPrimitive() {
   Vec4f v02 = vertices[2].pos_ - vertices[0].pos_;
   Vec4f normal = vector_cross(v01, v02);
 
-  if(normal.z > 0.0f) {
-    std::swap(vertices[2], vertices[1]);
-  }
+  if (normal.z > 0.0f) { std::swap(vertices[2], vertices[1]); }
 
-  if(normal.z == 0.0f) return;
+  if (normal.z == 0.0f) return;
   Vec2i p0 = vertices[0].spi_;
   Vec2i p1 = vertices[1].spi_;
   Vec2i p2 = vertices[2].spi_;
 
   float s = Abs(vector_cross(p1 - p0, p2 - p0));
-  if(s < 0) return;
+  if (s < 0) return;
 
   bool TopLeft01 = IsTopLeft(p0, p1);
   bool TopLeft12 = IsTopLeft(p1, p2);
@@ -118,7 +104,7 @@ void Renderer::DrawPrimitive() {
   // 迭代三角形外接矩形的所有点
   for (int cy = min_y; cy <= max_y; cy++) {
     for (int cx = min_x; cx <= max_x; cx++) {
-      Vec2f px = { (float)cx + 0.5f, (float)cy + 0.5f };
+      Vec2f px = {(float)cx + 0.5f, (float)cy + 0.5f};
 
       // Edge Equation
       // 使用整数避免浮点误差，同时因为是左手系，所以符号取反
@@ -126,12 +112,11 @@ void Renderer::DrawPrimitive() {
       int E12 = -(cx - p1.x) * (p2.y - p1.y) + (cy - p1.y) * (p2.x - p1.x);
       int E20 = -(cx - p2.x) * (p0.y - p2.y) + (cy - p2.y) * (p0.x - p2.x);
 
-
       // 如果是左上边，用 E >= 0 判断合法，如果右下边就用 E > 0 判断合法
       // 这里通过引入一个误差 1 ，来将 < 0 和 <= 0 用一个式子表达
-      if (E01 < (TopLeft01? 0 : 1)) continue;   // 在第一条边后面
-      if (E12 < (TopLeft12? 0 : 1)) continue;   // 在第二条边后面
-      if (E20 < (TopLeft20? 0 : 1)) continue;   // 在第三条边后面
+      if (E01 < (TopLeft01 ? 0 : 1)) continue;  // 在第一条边后面
+      if (E12 < (TopLeft12 ? 0 : 1)) continue;  // 在第二条边后面
+      if (E20 < (TopLeft20 ? 0 : 1)) continue;  // 在第三条边后面
 
       // 三个端点到当前点的矢量
       Vec2f s0 = vertices[0].spf_ - px;
@@ -139,10 +124,10 @@ void Renderer::DrawPrimitive() {
       Vec2f s2 = vertices[2].spf_ - px;
 
       // 重心坐标系：计算内部子三角形面积 a / b / c
-      float a = Abs(vector_cross(s1, s2));    // 子三角形 Px-P1-P2 面积
-      float b = Abs(vector_cross(s2, s0));    // 子三角形 Px-P2-P0 面积
-      float c = Abs(vector_cross(s0, s1));    // 子三角形 Px-P0-P1 面积
-      s = a + b + c;                    // 大三角形 P0-P1-P2 面积
+      float a = Abs(vector_cross(s1, s2));  // 子三角形 Px-P1-P2 面积
+      float b = Abs(vector_cross(s2, s0));  // 子三角形 Px-P2-P0 面积
+      float c = Abs(vector_cross(s0, s1));  // 子三角形 Px-P0-P1 面积
+      s = a + b + c;                        // 大三角形 P0-P1-P2 面积
 
       if (s == 0.0f) continue;
 
@@ -157,10 +142,10 @@ void Renderer::DrawPrimitive() {
 
       // 进行深度测试
       if (rhw < m_depth_buffer_[cy * m_window_width_ + cx]) continue;
-      m_depth_buffer_[cy * m_window_width_ + cx] = rhw;   // 记录 1/w 到深度缓存
+      m_depth_buffer_[cy * m_window_width_ + cx] = rhw;  // 记录 1/w 到深度缓存
 
       // 还原当前像素的 w
-      float w = 1.0f / ((rhw != 0.0f)? rhw : 1.0f);
+      float w = 1.0f / ((rhw != 0.0f) ? rhw : 1.0f);
 
       // 计算三个顶点插值 varying 的系数
       // 先除以各自顶点的 w 然后进行屏幕空间插值然后再乘以当前 w
@@ -171,10 +156,9 @@ void Renderer::DrawPrimitive() {
 
       ShaderContext input = BarycentricInterplate(vertices, Vec3f{c0, c1, c2});
       // 执行像素着色器
-      Vec4f color = { 0.0f, 0.0f, 0.0f, 0.0f };
+      Vec4f color = {0.0f, 0.0f, 0.0f, 0.0f};
       color = m_pixel_shader_(input);
       DrawPixel(cx, cy, color);
-
     }
   }
 }
@@ -211,13 +195,14 @@ void Renderer::DrawPixel(int x, int y, const Vec4f& color) {
 void Renderer::RenderClear() {
   SDL_SetRenderDrawColor(m_renderer_, 0, 0, 0, 255);
   SDL_RenderClear(m_renderer_);
-  std::fill( m_depth_buffer_.begin(), m_depth_buffer_.end(), 0);
+  std::fill(m_depth_buffer_.begin(), m_depth_buffer_.end(), 0);
 }
 
 void Renderer::Resize(int width, int height) {
   ResizeDepthBuffer(width, height);
   ResizeFrameBuffer(width, height);
 }
+
 void Renderer::ResizeDepthBuffer(int width, int height) { m_depth_buffer_.resize(width * height); }
 
 void Renderer::SetVertexShader(VertexShader vertex_shader) { m_vertex_shader_ = vertex_shader; }
@@ -228,5 +213,3 @@ void Renderer::ResizeFrameBuffer(int width, int height) {
   m_swap_texture_ = SDL_CreateTexture(m_renderer_, SDL_PIXELFORMAT_ARGB8888,
                                       SDL_TEXTUREACCESS_STREAMING, width, height);
 }
-
-void Renderer::Test() {}

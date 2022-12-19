@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cmath>
-
 #include <initializer_list>
 #include <iostream>
 #include <ostream>

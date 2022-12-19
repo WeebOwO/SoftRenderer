@@ -1,16 +1,16 @@
 /*
- * come from https://github.com/skywind3000/RenderHelp/blob/master/Model.h
+ * come from https://github.com/skywind3000/RenderHelp
  */
 
 #pragma once
-
 #include <fstream>
-#include <string>
-#include <vector>
-
-#include "bitmap.h"
+#include <sstream>
+#include <iostream>
 #include "math.h"
 
+//---------------------------------------------------------------------
+// model
+//---------------------------------------------------------------------
 class Model {
  public:
   inline virtual ~Model() {
@@ -18,7 +18,7 @@ class Model {
     if (_normalmap) delete _normalmap;
     if (_specularmap) delete _specularmap;
   }
-  Model() = default;
+
   inline Model(const char *filename) {
     _diffusemap = NULL;
     _normalmap = NULL;
@@ -114,7 +114,7 @@ class Model {
     if (dot == std::string::npos) return NULL;
     texfile = texfile.substr(0, dot) + std::string(suffix);
     Bitmap *texture = Bitmap::LoadFile(texfile.c_str());
-    std::cout << "loading:" << texfile << ((texture)? " OK" : " failed") << "\n";
+    std::cout << "loading: " << texfile << ((texture)? " OK" : " failed") << "\n";
     texture->FlipVertical();
     return texture;
   }
