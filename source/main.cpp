@@ -1,71 +1,60 @@
 #include <SDL2/SDL.h>
+
+#include "other/model.h"
 #include "renderer.h"
 
-struct VertexAttrib { Vec3f pos; Vec2f uv; Vec3f color; };
-
-// 顶点着色器输入
-VertexAttrib vs_input[3];
-
-// 模型
-VertexAttrib mesh[] = {
-    { {  1, -1,  1, }, { 0, 0 }, { 1.0f, 0.2f, 0.2f }, },
-    { { -1, -1,  1, }, { 0, 1 }, { 0.2f, 1.0f, 0.2f }, },
-    { { -1,  1,  1, }, { 1, 1 }, { 0.2f, 0.2f, 1.0f }, },
-    { {  1,  1,  1, }, { 1, 0 }, { 1.0f, 0.2f, 1.0f }, },
-    { {  1, -1, -1, }, { 0, 0 }, { 1.0f, 1.0f, 0.2f }, },
-    { { -1, -1, -1, }, { 0, 1 }, { 0.2f, 1.0f, 1.0f }, },
-    { { -1,  1, -1, }, { 1, 1 }, { 1.0f, 0.3f, 0.3f }, },
-    { {  1,  1, -1, }, { 1, 0 }, { 0.2f, 1.0f, 0.3f }, },
-};
-
-// 定义属性和 varying 中的纹理坐标 key
-const int VARYING_TEXUV = 0;
-const int VARYING_COLOR = 1;
-
-void draw_plane(Renderer& rh, int a, int b, int c, int d)
-{
-  mesh[a].uv.x = 0, mesh[a].uv.y = 0, mesh[b].uv.x = 0, mesh[b].uv.y = 1;
-  mesh[c].uv.x = 1, mesh[c].uv.y = 1, mesh[d].uv.x = 1, mesh[d].uv.y = 0;
-
-  vs_input[0] = mesh[a];
-  vs_input[1] = mesh[b];
-  vs_input[2] = mesh[c];
-  rh.DrawPrimitive();
-
-  vs_input[0] = mesh[c];
-  vs_input[1] = mesh[d];
-  vs_input[2] = mesh[a];
-  rh.DrawPrimitive();
-}
+constexpr int VARYING_UV = 0;
+constexpr int VARYING_EYE = 1;
+constexpr int VARYING_DEPTH = 2;
 
 int main() {
+  Model model("../obj/diablo3_pose.obj");
   WindowInfo window_info = {"Core", 0, 0, 900, 600};
   auto renderer = Renderer(window_info);
-  Bitmap texture(256, 256);
-  for (int y = 0; y < 256; y++) {
-    for (int x = 0; x < 256; x++) {
-      int k = (x / 32 + y / 32) & 1;
-      texture.SetPixel(x, y, k? 0xffffffff : 0xff3fbcef);
-    }
-  }
 
-  Mat4x4f mat_model = matrix_set_rotate(-1, -0.5, 1, 1);	// 模型变换，旋转一定角度
-  Mat4x4f mat_view = matrix_set_lookat({3.5, 0, 0}, {0,0,0}, {0,0,1});	// 摄像机方位
-  Mat4x4f mat_proj = matrix_set_perspective(3.1415926f * 0.5f, 800 / 600.0, 1.0, 500.0f);
-  Mat4x4f mat_mvp = mat_model * mat_view * mat_proj;	// 综合变换矩阵
+  Vec3f eye_pos = {0, 0, 2};
+  Vec3f eye_at = {0, 0, 0};
+  Vec3f eye_up = {0, 1, 0};
+  Vec3f light_dir = {1, 1, 0.85};			// 光的方向
+  float perspective = 3.1415926f * 0.5f;
 
-  renderer.SetVertexShader([&](int index, ShaderContext& output) {
-    Vec4f pos = vs_input[index].pos.xyz1() * mat_mvp;  // 扩充成四维矢量并变换
-    output.varying_vec2f[VARYING_TEXUV] = vs_input[index].uv;
-    output.varying_vec4f[VARYING_COLOR] = vs_input[index].color.xyz1();
+  // 变换矩阵
+  Mat4x4f mat_model = matrix_set_rotate(0, 1, 0, 0);
+  Mat4x4f mat_view = matrix_set_lookat(eye_pos, eye_at, eye_up);
+  Mat4x4f mat_proj = matrix_set_perspective(perspective, 9.0 / 8.0, 1.0, 500.0f);
+  Mat4x4f mat_mvp = mat_model * mat_view * mat_proj;
+  Mat4x4f mat_model_it = matrix_invert(mat_model).Transpose();
+
+  renderer.SetVertexShader([&] (VertexAttrib vs_input, ShaderContext& output) -> Vec4f {
+    Vec4f pos = vs_input.pos_.xyz1() * mat_mvp;
+    Vec3f pos_world = (vs_input.pos_.xyz1() * mat_model).xyz();
+    Vec3f eye_dir = eye_pos - pos_world;
+    output.varying_vec2f[VARYING_UV] = vs_input.uv_;
+    output.varying_float[VARYING_DEPTH] = vs_input.pos_.z;
+    output.varying_vec3f[VARYING_EYE] = eye_dir;
     return pos;
   });
 
   renderer.SetPixelShader([&](ShaderContext& input) {
-    Vec2f coord = input.varying_vec2f[VARYING_TEXUV];	// 取得纹理坐标
-    Vec4f tc = texture.Sample2D(coord);		// 纹理采样并返回像素颜色
-    return tc;		// 返回纹理
+    Vec2f uv = input.varying_vec2f[VARYING_UV];
+    Vec3f eye_dir = input.varying_vec3f[VARYING_EYE];
+    Vec4f base_color = Vec4f{1.0f, 1.0f, 1.0f, 1.0f};
+    Vec3f l = vector_normalize(light_dir);
+    Vec3f normal = (model.normal(uv).xyz1() * mat_model_it).xyz();
+    Vec3f r = vector_normalize(normal * vector_dot(normal, l) * 2.0f - l);
+    float s = model.Specular(uv);
+    float p = Saturate(vector_dot(r, eye_dir));
+    float spec_intensity = Saturate(pow(p, s * 10) * 0.05);
+
+    float diffuse_intensity = vector_dot(l, normal);
+    float ambient_intensity = 0.1;
+    Vec4f ambient_color = ambient_intensity * base_color;
+    Vec4f diffuse_color = diffuse_intensity * base_color;
+    Vec4f specular_color = spec_intensity * base_color;
+    return vector_clamp(ambient_color + diffuse_color + specular_color);
   });
+
+  std::array<VertexAttrib, 3> vs_inputs;
 
   for(bool running=true; running;) {
     SDL_Event event;
@@ -78,14 +67,16 @@ int main() {
     }
 
     renderer.RenderClear();
-    draw_plane(renderer, 0, 1, 2, 3);
-    draw_plane(renderer, 7, 6, 5, 4);
-    draw_plane(renderer, 0, 4, 5, 1);
-    draw_plane(renderer, 1, 5, 6, 2);
-    draw_plane(renderer, 2, 6, 7, 3);
-    draw_plane(renderer, 3, 7, 4, 0);
+    for(int i = 0; i < model.nfaces(); ++i) {
+      for(int j = 0; j < 3; ++j) {
+        vs_inputs[j].pos_ = model.vert(i, j);
+        vs_inputs[j].uv_ = model.uv(i, j);
+        vs_inputs[j].normal_ = model.normal(i, j);
+      }
+      renderer.DrawPrimitive(vs_inputs);
+    }
     renderer.RenderPresent();
+    SDL_Delay(1000/60);
   }
-
   return 0;
 }

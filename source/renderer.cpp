@@ -38,11 +38,19 @@ ShaderContext Renderer::BarycentricInterplate(std::array<Vertex, 3>& vertices,
     Vec2f factor_2 = s2.varying_vec2f[key] * interplate_factor[2];
     ret.varying_vec2f[key] = factor_0 + factor_1 + factor_2;
   }
+
+  for (const auto& [key, value] : s0.varying_float) {
+    float factor_0 = value * interplate_factor[0];
+    float factor_1 = s1.varying_float[key] * interplate_factor[1];
+    float factor_2 = s2.varying_float[key] * interplate_factor[2];
+    ret.varying_float[key] = factor_0 + factor_1 + factor_2;
+  }
   return ret;
 }
-void Renderer::RenderScene(const scene& scene) { return; }
 
-void Renderer::DrawPrimitive() {
+void Renderer::RenderScene(const Scene& scene) { return; }
+
+void Renderer::DrawPrimitive(std::array<VertexAttrib, 3>& vs_input) {
   if (m_vertex_shader_ == nullptr || m_pixel_shader_ == nullptr) return;
   static std::array<Vertex, 3> vertices;
   int width = m_window_width_, height = m_window_height_;
@@ -51,7 +59,7 @@ void Renderer::DrawPrimitive() {
   for (int i = 0; i < 3; ++i) {
     vertices[i].context_.Clear();
     // 运行Vertex Shader
-    vertices[i].pos_ = m_vertex_shader_(i, vertices[i].context_);
+    vertices[i].pos_ = m_vertex_shader_(vs_input[i], vertices[i].context_);
 
     // 齐次坐标裁减
     float w = vertices[i].pos_.w;
@@ -101,6 +109,7 @@ void Renderer::DrawPrimitive() {
   bool TopLeft12 = IsTopLeft(p1, p2);
   bool TopLeft20 = IsTopLeft(p2, p0);
 
+#pragma omp parallel for
   // 迭代三角形外接矩形的所有点
   for (int cy = min_y; cy <= max_y; cy++) {
     for (int cx = min_x; cx <= max_x; cx++) {
@@ -165,8 +174,10 @@ void Renderer::DrawPrimitive() {
 
 void Renderer::RenderPresent() {
   SDL_UpdateTexture(m_swap_texture_, nullptr, m_frame_buffer_, m_window_width_ * 4);
+//  SDL_SetTextureBlendMode(m_swap_texture_, SDL_BLENDMODE_BLEND);
   SDL_RenderCopy(m_renderer_, m_swap_texture_, nullptr, nullptr);
   SDL_RenderPresent(m_renderer_);
+
 }
 
 Renderer::Renderer(const WindowInfo& window_info)
@@ -180,6 +191,7 @@ Renderer::Renderer(const WindowInfo& window_info)
 Renderer::~Renderer() {
   SDL_DestroyWindow(m_window_);
   SDL_DestroyRenderer(m_renderer_);
+  delete[] m_frame_buffer_;
 }
 
 void Renderer::DrawPixel(int x, int y, const Vec4f& color) {
@@ -188,8 +200,9 @@ void Renderer::DrawPixel(int x, int y, const Vec4f& color) {
   auto g = static_cast<int>(my_color_vec.g * 255.0f);
   auto b = static_cast<int>(my_color_vec.b * 255.0f);
   auto a = static_cast<int>(my_color_vec.a * 255.0f);
+
   uint32_t final_color = (a << 24) + (r << 16) + (g << 8) + b;
-  m_frame_buffer_[y * m_window_width_ + x] = final_color;
+  *(m_frame_buffer_ + y * m_window_width_ + x) = final_color;
 }
 
 void Renderer::RenderClear() {
@@ -212,4 +225,5 @@ void Renderer::SetPixelShader(PixelShader pixel_shader) { m_pixel_shader_ = pixe
 void Renderer::ResizeFrameBuffer(int width, int height) {
   m_swap_texture_ = SDL_CreateTexture(m_renderer_, SDL_PIXELFORMAT_ARGB8888,
                                       SDL_TEXTUREACCESS_STREAMING, width, height);
+  m_frame_buffer_ = new uint32_t [width * height];
 }

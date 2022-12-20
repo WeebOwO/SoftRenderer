@@ -3,8 +3,10 @@
  */
 
 #pragma once
-#include <string>
+
 #include <cstring>
+#include <string>
+
 #include "math.h"
 
 class Bitmap
