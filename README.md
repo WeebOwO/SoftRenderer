@@ -12,3 +12,5 @@ you need cmake and c++ compiler. And having those tools. You can run commands be
  cmake ..
 ```
 
+## ScreenShot
+<img src="img/final_res.png" width=50% height=50%>
