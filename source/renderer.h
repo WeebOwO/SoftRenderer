@@ -10,7 +10,6 @@
 class SDL_Renderer;
 class SDL_Window;
 class SDL_Texture;
-class Scene;
 
 struct WindowInfo {
   const char* title_{"HardCore"};
@@ -22,7 +21,6 @@ struct WindowInfo {
 
 class Renderer {
  public:
-  void RenderScene(const Scene& scene);
   void RenderPresent();
   void DrawPrimitive(std::array<VertexAttrib, 3>& vs_input);
   void RenderClear();

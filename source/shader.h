@@ -6,10 +6,10 @@
 #include "other/math.h"
 
 struct ShaderContext {
-  std::unordered_map<int, float> varying_float;  // 浮点数 varying 列表
-  std::unordered_map<int, Vec2f> varying_vec2f;  // 二维矢量 varying 列表
-  std::unordered_map<int, Vec3f> varying_vec3f;  // 三维矢量 varying 列表
-  std::unordered_map<int, Vec4f> varying_vec4f;  // 四维矢量 varying 列表
+  std::unordered_map<int, float> varying_float_;  // 浮点数 varying 列表
+  std::unordered_map<int, Vec2f> varying_vec2f_;  // 二维矢量 varying 列表
+  std::unordered_map<int, Vec3f> varying_vec3f_;  // 三维矢量 varying 列表
+  std::unordered_map<int, Vec4f> varying_vec4f_;  // 四维矢量 varying 列表
   void Clear();
 };
 

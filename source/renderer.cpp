@@ -3,8 +3,8 @@
 #include <SDL2/SDL.h>
 
 #include <algorithm>
-
-
+#include <execution>
+#include <utility>
 static bool IsTopLeft(const Vec2i& a, const Vec2i& b) {
   return ((a.y == b.y) && (a.x < b.x)) || (a.y > b.y);
 }
@@ -18,41 +18,39 @@ ShaderContext Renderer::BarycentricInterplate(std::array<Vertex, 3>& vertices,
 
   std::array<float, 3> interplate_factor{barycentric.x, barycentric.y, barycentric.z};
 
-  for (const auto& [key, value] : s0.varying_vec4f) {
+  for (const auto& [key, value] : s0.varying_vec4f_) {
     Vec4f factor_0 = value * interplate_factor[0];
-    Vec4f factor_1 = s1.varying_vec4f[key] * interplate_factor[1];
-    Vec4f factor_2 = s2.varying_vec4f[key] * interplate_factor[2];
-    ret.varying_vec4f[key] = factor_0 + factor_1 + factor_2;
+    Vec4f factor_1 = s1.varying_vec4f_[key] * interplate_factor[1];
+    Vec4f factor_2 = s2.varying_vec4f_[key] * interplate_factor[2];
+    ret.varying_vec4f_[key] = factor_0 + factor_1 + factor_2;
   }
 
-  for (const auto& [key, value] : s0.varying_vec3f) {
+  for (const auto& [key, value] : s0.varying_vec3f_) {
     Vec3f factor_0 = value * interplate_factor[0];
-    Vec3f factor_1 = s1.varying_vec3f[key] * interplate_factor[1];
-    Vec3f factor_2 = s2.varying_vec3f[key] * interplate_factor[2];
-    ret.varying_vec3f[key] = factor_0 + factor_1 + factor_2;
+    Vec3f factor_1 = s1.varying_vec3f_[key] * interplate_factor[1];
+    Vec3f factor_2 = s2.varying_vec3f_[key] * interplate_factor[2];
+    ret.varying_vec3f_[key] = factor_0 + factor_1 + factor_2;
   }
 
-  for (const auto& [key, value] : s0.varying_vec2f) {
+  for (const auto& [key, value] : s0.varying_vec2f_) {
     Vec2f factor_0 = value * interplate_factor[0];
-    Vec2f factor_1 = s1.varying_vec2f[key] * interplate_factor[1];
-    Vec2f factor_2 = s2.varying_vec2f[key] * interplate_factor[2];
-    ret.varying_vec2f[key] = factor_0 + factor_1 + factor_2;
+    Vec2f factor_1 = s1.varying_vec2f_[key] * interplate_factor[1];
+    Vec2f factor_2 = s2.varying_vec2f_[key] * interplate_factor[2];
+    ret.varying_vec2f_[key] = factor_0 + factor_1 + factor_2;
   }
 
-  for (const auto& [key, value] : s0.varying_float) {
+  for (const auto& [key, value] : s0.varying_float_) {
     float factor_0 = value * interplate_factor[0];
-    float factor_1 = s1.varying_float[key] * interplate_factor[1];
-    float factor_2 = s2.varying_float[key] * interplate_factor[2];
-    ret.varying_float[key] = factor_0 + factor_1 + factor_2;
+    float factor_1 = s1.varying_float_[key] * interplate_factor[1];
+    float factor_2 = s2.varying_float_[key] * interplate_factor[2];
+    ret.varying_float_[key] = factor_0 + factor_1 + factor_2;
   }
   return ret;
 }
 
-void Renderer::RenderScene(const Scene& scene) { return; }
-
 void Renderer::DrawPrimitive(std::array<VertexAttrib, 3>& vs_input) {
   if (m_vertex_shader_ == nullptr || m_pixel_shader_ == nullptr) return;
-  static std::array<Vertex, 3> vertices;
+  std::array<Vertex, 3> vertices;
   int width = m_window_width_, height = m_window_height_;
   int min_x, max_x, min_y, max_y;
 
@@ -111,10 +109,18 @@ void Renderer::DrawPrimitive(std::array<VertexAttrib, 3>& vs_input) {
 
 #pragma omp parallel for
   // 迭代三角形外接矩形的所有点
-  for (int cy = min_y; cy <= max_y; cy++) {
-    for (int cx = min_x; cx <= max_x; cx++) {
-      Vec2f px = {(float)cx + 0.5f, (float)cy + 0.5f};
+  std::vector<int> horizontal_vec(max_x - min_x + 1);
 
+  [&horizontal_vec, min_x]() mutable {
+    for(int i = 0; i < horizontal_vec.size(); ++i) {
+      horizontal_vec[i] = min_x++;
+    }
+  }();
+
+  for (int cy = min_y; cy <= max_y; cy++) {
+    // 利于平行化STL foreach 进行加速
+    std::for_each(std::execution::par, horizontal_vec.begin(), horizontal_vec.end(), [&](int cx) {
+      Vec2f px = {(float)cx + 0.5f, (float)cy + 0.5f};
       // Edge Equation
       // 使用整数避免浮点误差，同时因为是左手系，所以符号取反
       int E01 = -(cx - p0.x) * (p1.y - p0.y) + (cy - p0.y) * (p1.x - p0.x);
@@ -123,9 +129,9 @@ void Renderer::DrawPrimitive(std::array<VertexAttrib, 3>& vs_input) {
 
       // 如果是左上边，用 E >= 0 判断合法，如果右下边就用 E > 0 判断合法
       // 这里通过引入一个误差 1 ，来将 < 0 和 <= 0 用一个式子表达
-      if (E01 < (TopLeft01 ? 0 : 1)) continue;  // 在第一条边后面
-      if (E12 < (TopLeft12 ? 0 : 1)) continue;  // 在第二条边后面
-      if (E20 < (TopLeft20 ? 0 : 1)) continue;  // 在第三条边后面
+      if (E01 < (TopLeft01 ? 0 : 1)) return;  // 在第一条边后面
+      if (E12 < (TopLeft12 ? 0 : 1)) return;  // 在第二条边后面
+      if (E20 < (TopLeft20 ? 0 : 1)) return;  // 在第三条边后面
 
       // 三个端点到当前点的矢量
       Vec2f s0 = vertices[0].spf_ - px;
@@ -138,7 +144,7 @@ void Renderer::DrawPrimitive(std::array<VertexAttrib, 3>& vs_input) {
       float c = Abs(vector_cross(s0, s1));  // 子三角形 Px-P0-P1 面积
       s = a + b + c;                        // 大三角形 P0-P1-P2 面积
 
-      if (s == 0.0f) continue;
+      if (s == 0.0f) return;
 
       // 除以总面积，以保证：a + b + c = 1，方便用作插值系数
       a = a * (1.0f / s);
@@ -150,7 +156,7 @@ void Renderer::DrawPrimitive(std::array<VertexAttrib, 3>& vs_input) {
       float rhw = vertices[0].rhw_ * a + vertices[1].rhw_ * b + vertices[2].rhw_ * c;
 
       // 进行深度测试
-      if (rhw < m_depth_buffer_[cy * m_window_width_ + cx]) continue;
+      if (rhw < m_depth_buffer_[cy * m_window_width_ + cx]) return;
       m_depth_buffer_[cy * m_window_width_ + cx] = rhw;  // 记录 1/w 到深度缓存
 
       // 还原当前像素的 w
@@ -168,7 +174,7 @@ void Renderer::DrawPrimitive(std::array<VertexAttrib, 3>& vs_input) {
       Vec4f color = {0.0f, 0.0f, 0.0f, 0.0f};
       color = m_pixel_shader_(input);
       DrawPixel(cx, cy, color);
-    }
+    });
   }
 }
 
@@ -177,7 +183,6 @@ void Renderer::RenderPresent() {
 //  SDL_SetTextureBlendMode(m_swap_texture_, SDL_BLENDMODE_BLEND);
   SDL_RenderCopy(m_renderer_, m_swap_texture_, nullptr, nullptr);
   SDL_RenderPresent(m_renderer_);
-
 }
 
 Renderer::Renderer(const WindowInfo& window_info)
@@ -218,9 +223,9 @@ void Renderer::Resize(int width, int height) {
 
 void Renderer::ResizeDepthBuffer(int width, int height) { m_depth_buffer_.resize(width * height); }
 
-void Renderer::SetVertexShader(VertexShader vertex_shader) { m_vertex_shader_ = vertex_shader; }
+void Renderer::SetVertexShader(VertexShader vertex_shader) { m_vertex_shader_ = std::move(vertex_shader); }
 
-void Renderer::SetPixelShader(PixelShader pixel_shader) { m_pixel_shader_ = pixel_shader; }
+void Renderer::SetPixelShader(PixelShader pixel_shader) { m_pixel_shader_ = std::move(pixel_shader); }
 
 void Renderer::ResizeFrameBuffer(int width, int height) {
   m_swap_texture_ = SDL_CreateTexture(m_renderer_, SDL_PIXELFORMAT_ARGB8888,
