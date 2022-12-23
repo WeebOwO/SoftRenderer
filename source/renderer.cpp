@@ -118,7 +118,7 @@ void Renderer::DrawPrimitive(std::array<VertexAttrib, 3>& vs_input) {
   }();
 
   for (int cy = min_y; cy <= max_y; cy++) {
-    // 利于平行化STL foreach 进行加速
+    // 利于并行化STL foreach 进行加速
     std::for_each(std::execution::par, horizontal_vec.begin(), horizontal_vec.end(), [&](int cx) {
       Vec2f px = {(float)cx + 0.5f, (float)cy + 0.5f};
       // Edge Equation
