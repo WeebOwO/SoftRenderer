@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <execution>
 #include <utility>
+#include <ranges>
 static bool IsTopLeft(const Vec2i& a, const Vec2i& b) {
   return ((a.y == b.y) && (a.x < b.x)) || (a.y > b.y);
 }
@@ -109,17 +110,10 @@ void Renderer::DrawPrimitive(std::array<VertexAttrib, 3>& vs_input) {
 
 #pragma omp parallel for
   // 迭代三角形外接矩形的所有点
-  std::vector<int> horizontal_vec(max_x - min_x + 1);
-
-  [&horizontal_vec, min_x]() mutable {
-    for(int i = 0; i < horizontal_vec.size(); ++i) {
-      horizontal_vec[i] = min_x++;
-    }
-  }();
-
+  auto horizontal_range = std::ranges::views::iota(min_x, max_x + 1);
   for (int cy = min_y; cy <= max_y; cy++) {
     // 利于并行化STL foreach 进行加速
-    std::for_each(std::execution::par, horizontal_vec.begin(), horizontal_vec.end(), [&](int cx) {
+    std::for_each(std::execution::par, horizontal_range.begin(), horizontal_range.end(), [&](int cx) {
       Vec2f px = {(float)cx + 0.5f, (float)cy + 0.5f};
       // Edge Equation
       // 使用整数避免浮点误差，同时因为是左手系，所以符号取反
