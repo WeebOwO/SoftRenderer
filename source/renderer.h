@@ -12,11 +12,11 @@ class SDL_Window;
 class SDL_Texture;
 
 struct WindowInfo {
-  const char* title_{"HardCore"};
-  int x_{0};
-  int y_{0};
-  int width_{900};
-  int height_{600};
+  const char* title{"HardCore"};
+  int x{0};
+  int y{0};
+  int width{900};
+  int height{600};
 };
 
 class Renderer {
@@ -37,13 +37,13 @@ class Renderer {
   ShaderContext BarycentricInterplate(std::array<Vertex, 3>& vertices, const Vec3f& barycentric);
  private:
   // 只是用来管理窗口的运行环境
-  int m_window_width_{900};
-  int m_window_height_{600};
-  SDL_Renderer* m_renderer_{nullptr};
-  SDL_Window* m_window_{nullptr};
-  SDL_Texture* m_swap_texture_{nullptr};
-  uint32_t* m_frame_buffer_;
-  std::vector<float> m_depth_buffer_;
-  VertexShader m_vertex_shader_;
-  PixelShader m_pixel_shader_;
+  int window_width_{900};
+  int window_height_{600};
+  SDL_Renderer* renderer_{nullptr};
+  SDL_Window* window_{nullptr};
+  SDL_Texture* swap_texture_{nullptr};
+  uint32_t* frame_buffer_;
+  std::vector<float> depth_buffer_;
+  VertexShader vertex_shader_;
+  PixelShader pixel_shader_;
 };

@@ -5,7 +5,8 @@
 
 #include "other/math.h"
 
-struct ShaderContext {
+class ShaderContext {
+ public:
   std::unordered_map<int, float> varying_float_;  // 浮点数 varying 列表
   std::unordered_map<int, Vec2f> varying_vec2f_;  // 二维矢量 varying 列表
   std::unordered_map<int, Vec3f> varying_vec3f_;  // 三维矢量 varying 列表
@@ -14,17 +15,17 @@ struct ShaderContext {
 };
 
 struct VertexAttrib {
-  Vec3f pos_;
-  Vec3f normal_;
-  Vec2f uv_;
+  Vec3f pos;
+  Vec3f normal;
+  Vec2f uv;
 };
 
 struct Vertex {
-  ShaderContext context_;
-  float rhw_;
-  Vec4f pos_;
-  Vec2f spf_;
-  Vec2i spi_;
+  ShaderContext context;
+  float rhw;
+  Vec4f pos;
+  Vec2f spf;
+  Vec2i spi;
 };
 
 using VertexShader = std::function<Vec4f(VertexAttrib& vs_input, ShaderContext& output)>;

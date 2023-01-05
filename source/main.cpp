@@ -26,11 +26,11 @@ int main() {
   Mat4x4f mat_model_it = matrix_invert(mat_model).Transpose();
 
   renderer.SetVertexShader([&] (VertexAttrib vs_input, ShaderContext& output) -> Vec4f {
-    Vec4f pos = vs_input.pos_.xyz1() * mat_mvp;
-    Vec3f pos_world = (vs_input.pos_.xyz1() * mat_model).xyz();
+    Vec4f pos = vs_input.pos.xyz1() * mat_mvp;
+    Vec3f pos_world = (vs_input.pos.xyz1() * mat_model).xyz();
     Vec3f eye_dir = eye_pos - pos_world;
-    output.varying_vec2f_[VARYING_UV] = vs_input.uv_;
-    output.varying_float_[VARYING_DEPTH] = vs_input.pos_.z;
+    output.varying_vec2f_[VARYING_UV] = vs_input.uv;
+    output.varying_float_[VARYING_DEPTH] = vs_input.pos.z;
     output.varying_vec3f_[VARYING_EYE] = eye_dir;
     return pos;
   });
@@ -71,9 +71,9 @@ int main() {
 
     for(int i = 0; i < model.nfaces(); ++i) {
       for(int j = 0; j < 3; ++j) {
-        vs_inputs[j].pos_ = model.vert(i, j);
-        vs_inputs[j].uv_ = model.uv(i, j);
-        vs_inputs[j].normal_ = model.normal(i, j);
+        vs_inputs[j].pos = model.vert(i, j);
+        vs_inputs[j].uv = model.uv(i, j);
+        vs_inputs[j].normal = model.normal(i, j);
       }
       renderer.DrawPrimitive(vs_inputs);
     }
