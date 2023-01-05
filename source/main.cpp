@@ -25,7 +25,7 @@ int main() {
   Mat4x4f mat_mvp = mat_model * mat_view * mat_proj;
   Mat4x4f mat_model_it = matrix_invert(mat_model).Transpose();
 
-  renderer.SetVertexShader([&] (VertexAttrib vs_input, ShaderContext& output) -> Vec4f {
+  renderer.SetVertexShader([&](VertexAttrib vs_input, ShaderContext& output) -> Vec4f {
     Vec4f pos = vs_input.pos.xyz1() * mat_mvp;
     Vec3f pos_world = (vs_input.pos.xyz1() * mat_model).xyz();
     Vec3f eye_dir = eye_pos - pos_world;
@@ -49,16 +49,16 @@ int main() {
     float diffuse_intensity = vector_dot(l, normal);
     float ambient_intensity = 0.1;
     // test color
-//    Vec4f ambient_color = ambient_intensity * base_color;
-//    Vec4f diffuse_color = diffuse_intensity * base_color;
-//    Vec4f specular_color = spec_intensity * base_color;
+    //    Vec4f ambient_color = ambient_intensity * base_color;
+    //    Vec4f diffuse_color = diffuse_intensity * base_color;
+    //    Vec4f specular_color = spec_intensity * base_color;
     Vec4f output_color = (diffuse_intensity + ambient_intensity + spec_intensity) * base_color;
     return vector_clamp(output_color);
   });
 
   std::array<VertexAttrib, 3> vs_inputs;
 
-  for(bool running=true; running;) {
+  for (bool running = true; running;) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
@@ -69,8 +69,8 @@ int main() {
     }
     renderer.RenderClear();
 
-    for(int i = 0; i < model.nfaces(); ++i) {
-      for(int j = 0; j < 3; ++j) {
+    for (int i = 0; i < model.nfaces(); ++i) {
+      for (int j = 0; j < 3; ++j) {
         vs_inputs[j].pos = model.vert(i, j);
         vs_inputs[j].uv = model.uv(i, j);
         vs_inputs[j].normal = model.normal(i, j);
@@ -78,7 +78,7 @@ int main() {
       renderer.DrawPrimitive(vs_inputs);
     }
     renderer.RenderPresent();
-    SDL_Delay(1000/60);
+    SDL_Delay(1000 / 60);
   }
   return 0;
 }

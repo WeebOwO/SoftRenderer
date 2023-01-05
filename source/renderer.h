@@ -33,8 +33,10 @@ class Renderer {
   Renderer() = delete;
   explicit Renderer(const WindowInfo& window_info);
   ~Renderer();
+
  private:
   ShaderContext BarycentricInterplate(std::array<Vertex, 3>& vertices, const Vec3f& barycentric);
+
  private:
   // 只是用来管理窗口的运行环境
   int window_width_{900};

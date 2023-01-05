@@ -4,8 +4,9 @@
 
 #include <algorithm>
 #include <execution>
-#include <utility>
 #include <ranges>
+#include <utility>
+
 static bool IsTopLeft(const Vec2i& a, const Vec2i& b) {
   return ((a.y == b.y) && (a.x < b.x)) || (a.y > b.y);
 }
@@ -113,68 +114,69 @@ void Renderer::DrawPrimitive(std::array<VertexAttrib, 3>& vs_input) {
   auto horizontal_range = std::ranges::views::iota(min_x, max_x + 1);
   for (int cy = min_y; cy <= max_y; cy++) {
     // 利于并行化STL foreach 进行加速
-    std::for_each(std::execution::par, horizontal_range.begin(), horizontal_range.end(), [&](int cx) {
-      Vec2f px = {(float)cx + 0.5f, (float)cy + 0.5f};
-      // Edge Equation
-      // 使用整数避免浮点误差，同时因为是左手系，所以符号取反
-      int E01 = -(cx - p0.x) * (p1.y - p0.y) + (cy - p0.y) * (p1.x - p0.x);
-      int E12 = -(cx - p1.x) * (p2.y - p1.y) + (cy - p1.y) * (p2.x - p1.x);
-      int E20 = -(cx - p2.x) * (p0.y - p2.y) + (cy - p2.y) * (p0.x - p2.x);
+    std::for_each(std::execution::par, horizontal_range.begin(), horizontal_range.end(),
+                  [&](int cx) {
+                    Vec2f px = {(float)cx + 0.5f, (float)cy + 0.5f};
+                    // Edge Equation
+                    // 使用整数避免浮点误差，同时因为是左手系，所以符号取反
+                    int E01 = -(cx - p0.x) * (p1.y - p0.y) + (cy - p0.y) * (p1.x - p0.x);
+                    int E12 = -(cx - p1.x) * (p2.y - p1.y) + (cy - p1.y) * (p2.x - p1.x);
+                    int E20 = -(cx - p2.x) * (p0.y - p2.y) + (cy - p2.y) * (p0.x - p2.x);
 
-      // 如果是左上边，用 E >= 0 判断合法，如果右下边就用 E > 0 判断合法
-      // 这里通过引入一个误差 1 ，来将 < 0 和 <= 0 用一个式子表达
-      if (E01 < (TopLeft01 ? 0 : 1)) return;  // 在第一条边后面
-      if (E12 < (TopLeft12 ? 0 : 1)) return;  // 在第二条边后面
-      if (E20 < (TopLeft20 ? 0 : 1)) return;  // 在第三条边后面
+                    // 如果是左上边，用 E >= 0 判断合法，如果右下边就用 E > 0 判断合法
+                    // 这里通过引入一个误差 1 ，来将 < 0 和 <= 0 用一个式子表达
+                    if (E01 < (TopLeft01 ? 0 : 1)) return;  // 在第一条边后面
+                    if (E12 < (TopLeft12 ? 0 : 1)) return;  // 在第二条边后面
+                    if (E20 < (TopLeft20 ? 0 : 1)) return;  // 在第三条边后面
 
-      // 三个端点到当前点的矢量
-      Vec2f s0 = vertices[0].spf - px;
-      Vec2f s1 = vertices[1].spf - px;
-      Vec2f s2 = vertices[2].spf - px;
+                    // 三个端点到当前点的矢量
+                    Vec2f s0 = vertices[0].spf - px;
+                    Vec2f s1 = vertices[1].spf - px;
+                    Vec2f s2 = vertices[2].spf - px;
 
-      // 重心坐标系：计算内部子三角形面积 a / b / c
-      float a = Abs(vector_cross(s1, s2));  // 子三角形 Px-P1-P2 面积
-      float b = Abs(vector_cross(s2, s0));  // 子三角形 Px-P2-P0 面积
-      float c = Abs(vector_cross(s0, s1));  // 子三角形 Px-P0-P1 面积
-      s = a + b + c;                        // 大三角形 P0-P1-P2 面积
+                    // 重心坐标系：计算内部子三角形面积 a / b / c
+                    float a = Abs(vector_cross(s1, s2));  // 子三角形 Px-P1-P2 面积
+                    float b = Abs(vector_cross(s2, s0));  // 子三角形 Px-P2-P0 面积
+                    float c = Abs(vector_cross(s0, s1));  // 子三角形 Px-P0-P1 面积
+                    s = a + b + c;                        // 大三角形 P0-P1-P2 面积
 
-      if (s == 0.0f) return;
+                    if (s == 0.0f) return;
 
-      // 除以总面积，以保证：a + b + c = 1，方便用作插值系数
-      a = a * (1.0f / s);
-      b = b * (1.0f / s);
-      c = c * (1.0f / s);
+                    // 除以总面积，以保证：a + b + c = 1，方便用作插值系数
+                    a = a * (1.0f / s);
+                    b = b * (1.0f / s);
+                    c = c * (1.0f / s);
 
-      // 计算当前点的 1/w，因 1/w 和屏幕空间呈线性关系，故直接重心插值
-      // 因为透视投影最后一步会除以w
-      float rhw = vertices[0].rhw * a + vertices[1].rhw * b + vertices[2].rhw * c;
+                    // 计算当前点的 1/w，因 1/w 和屏幕空间呈线性关系，故直接重心插值
+                    // 因为透视投影最后一步会除以w
+                    float rhw = vertices[0].rhw * a + vertices[1].rhw * b + vertices[2].rhw * c;
 
-      // 进行深度测试
-      if (rhw < depth_buffer_[cy * window_width_ + cx]) return;
-      depth_buffer_[cy * window_width_ + cx] = rhw;  // 记录 1/w 到深度缓存
+                    // 进行深度测试
+                    if (rhw < depth_buffer_[cy * window_width_ + cx]) return;
+                    depth_buffer_[cy * window_width_ + cx] = rhw;  // 记录 1/w 到深度缓存
 
-      // 还原当前像素的 w
-      float w = 1.0f / ((rhw != 0.0f) ? rhw : 1.0f);
+                    // 还原当前像素的 w
+                    float w = 1.0f / ((rhw != 0.0f) ? rhw : 1.0f);
 
-      // 计算三个顶点插值 varying 的系数
-      // 先除以各自顶点的 w 然后进行屏幕空间插值然后再乘以当前 w
-      // 已经经过透视校正
-      float c0 = vertices[0].rhw * a * w;
-      float c1 = vertices[1].rhw * b * w;
-      float c2 = vertices[2].rhw * c * w;
+                    // 计算三个顶点插值 varying 的系数
+                    // 先除以各自顶点的 w 然后进行屏幕空间插值然后再乘以当前 w
+                    // 已经经过透视校正
+                    float c0 = vertices[0].rhw * a * w;
+                    float c1 = vertices[1].rhw * b * w;
+                    float c2 = vertices[2].rhw * c * w;
 
-      ShaderContext input = BarycentricInterplate(vertices, Vec3f{c0, c1, c2});
-      // 执行像素着色器
-      Vec4f color = {0.0f, 0.0f, 0.0f, 0.0f};
-      color = pixel_shader_(input);
-      DrawPixel(cx, cy, color);
-    });
+                    ShaderContext input = BarycentricInterplate(vertices, Vec3f{c0, c1, c2});
+                    // 执行像素着色器
+                    Vec4f color = {0.0f, 0.0f, 0.0f, 0.0f};
+                    color = pixel_shader_(input);
+                    DrawPixel(cx, cy, color);
+                  });
   }
 }
 
 void Renderer::RenderPresent() {
   SDL_UpdateTexture(swap_texture_, nullptr, frame_buffer_, window_width_ * 4);
-//  SDL_SetTextureBlendMode(swap_texture_, SDL_BLENDMODE_BLEND);
+  //  SDL_SetTextureBlendMode(swap_texture_, SDL_BLENDMODE_BLEND);
   SDL_RenderCopy(renderer_, swap_texture_, nullptr, nullptr);
   SDL_RenderPresent(renderer_);
 }
@@ -182,7 +184,7 @@ void Renderer::RenderPresent() {
 Renderer::Renderer(const WindowInfo& window_info)
     : window_width_(window_info.width), window_height_(window_info.height) {
   window_ = SDL_CreateWindow(window_info.title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                               window_info.width, window_info.height, SDL_WINDOW_RESIZABLE);
+                             window_info.width, window_info.height, SDL_WINDOW_RESIZABLE);
   renderer_ = SDL_CreateRenderer(window_, -1, 0);
   Resize(window_info.width, window_info.height);
 }
@@ -218,12 +220,13 @@ void Renderer::Resize(int width, int height) {
 void Renderer::ResizeDepthBuffer(int width, int height) { depth_buffer_.resize(width * height); }
 
 void Renderer::SetVertexShader(VertexShader vertex_shader) {
-  vertex_shader_ = std::move(vertex_shader); }
+  vertex_shader_ = std::move(vertex_shader);
+}
 
 void Renderer::SetPixelShader(PixelShader pixel_shader) { pixel_shader_ = std::move(pixel_shader); }
 
 void Renderer::ResizeFrameBuffer(int width, int height) {
   swap_texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_ARGB8888,
-                                      SDL_TEXTUREACCESS_STREAMING, width, height);
-  frame_buffer_ = new uint32_t [width * height];
+                                    SDL_TEXTUREACCESS_STREAMING, width, height);
+  frame_buffer_ = new uint32_t[width * height];
 }
