@@ -1,8 +1,7 @@
-BasedOnStyle: Google
-Language: Cpp
+BasedOnStyle: LLVM
 
-AllowShortBlocksOnASingleLine: Always
-AllowShortIfStatementsOnASingleLine: Always
-AllowShortLambdasOnASingleLine: All
+Language: Cpp
+TabWidth: 4
 UseTab: Never
-ColumnLimit: 100
+IndentWidth: 4
+ColumnLimit: 80
