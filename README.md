@@ -1,5 +1,5 @@
 # SoftRenderer
- A simple renderer without graphic api like Vulcan, DirectX and OpenGL. 
+ A simple m_renderer without graphic api like Vulcan, DirectX and OpenGL. 
 ## Dependency
 SDL2 for create window and draw point, you need to link that youself and change setting in CMakeLists.txt.
 

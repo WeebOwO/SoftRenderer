@@ -20,7 +20,7 @@ struct WindowInfo {
 };
 
 class Renderer {
-  public:
+   public:
     void RenderPresent();
     void DrawPrimitive(std::array<VertexAttrib, 3> &vs_input);
     void RenderClear();
@@ -34,19 +34,19 @@ class Renderer {
     explicit Renderer(const WindowInfo &window_info);
     ~Renderer();
 
-  private:
+   private:
     ShaderContext BarycentricInterplate(std::array<Vertex, 3> &vertices,
                                         const Vec3f &barycentric);
 
-  private:
+   private:
     // 只是用来管理窗口的运行环境
-    int window_width_{900};
-    int window_height_{600};
-    SDL_Renderer *renderer_{nullptr};
-    SDL_Window *window_{nullptr};
-    SDL_Texture *swap_texture_{nullptr};
-    uint32_t *frame_buffer_;
-    std::vector<float> depth_buffer_;
-    VertexShader vertex_shader_;
-    PixelShader pixel_shader_;
+    int m_windowWidth{900};
+    int m_windowHeight_{600};
+    SDL_Renderer *m_renderer{nullptr};
+    SDL_Window *m_window{nullptr};
+    SDL_Texture *m_swapTexture{nullptr};
+    uint32_t *m_frameBuffer;
+    std::vector<float> m_depthBuffer;
+    VertexShader m_vertexShader;
+    PixelShader m_pixelShader;
 };

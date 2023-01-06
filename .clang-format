@@ -1,4 +1,4 @@
-BasedOnStyle: LLVM
+BasedOnStyle: Google
 
 Language: Cpp
 TabWidth: 4

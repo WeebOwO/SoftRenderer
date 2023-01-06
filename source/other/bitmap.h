@@ -10,22 +10,21 @@
 #include "math.h"
 
 class Bitmap {
-  public:
+   public:
     inline virtual ~Bitmap() {
-        if (_bits)
-            delete[] _bits;
-        _bits = NULL;
+        if (m_bits) delete[] m_bits;
+        m_bits = NULL;
     }
-    inline Bitmap(int width, int height) : _w(width), _h(height) {
-        _pitch = width * 4;
-        _bits = new uint8_t[_pitch * _h];
+    inline Bitmap(int width, int height) : m_width(width), m_height(height) {
+        m_pitch = width * 4;
+        m_bits = new uint8_t[m_pitch * m_height];
         Fill(0);
     }
 
     inline Bitmap(const Bitmap &src)
-        : _w(src._w), _h(src._h), _pitch(src._pitch) {
-        _bits = new uint8_t[_pitch * _h];
-        memcpy(_bits, src._bits, _pitch * _h);
+        : m_width(src.m_width), m_height(src.m_height), m_pitch(src.m_pitch) {
+        m_bits = new uint8_t[m_pitch * m_height];
+        memcpy(m_bits, src.m_bits, m_pitch * m_height);
     }
 
     inline Bitmap(const char *filename) {
@@ -35,42 +34,42 @@ class Bitmap {
             msg.append(filename);
             throw std::runtime_error(msg);
         }
-        _w = tmp->_w;
-        _h = tmp->_h;
-        _pitch = tmp->_pitch;
-        _bits = tmp->_bits;
-        tmp->_bits = NULL;
+        m_width = tmp->m_width;
+        m_height = tmp->m_height;
+        m_pitch = tmp->m_pitch;
+        m_bits = tmp->m_bits;
+        tmp->m_bits = NULL;
         delete tmp;
     }
 
-  public:
-    inline int GetW() const { return _w; }
-    inline int GetH() const { return _h; }
-    inline int GetPitch() const { return _pitch; }
-    inline uint8_t *GetBits() { return _bits; }
-    inline const uint8_t *GetBits() const { return _bits; }
-    inline uint8_t *GetLine(int y) { return _bits + _pitch * y; }
-    inline const uint8_t *GetLine(int y) const { return _bits + _pitch * y; }
+   public:
+    inline int GetW() const { return m_width; }
+    inline int GetH() const { return m_height; }
+    inline int GetPitch() const { return m_pitch; }
+    inline uint8_t *GetBits() { return m_bits; }
+    inline const uint8_t *GetBits() const { return m_bits; }
+    inline uint8_t *GetLine(int y) { return m_bits + m_pitch * y; }
+    inline const uint8_t *GetLine(int y) const { return m_bits + m_pitch * y; }
 
-  public:
+   public:
     inline void Fill(uint32_t color) {
-        for (int j = 0; j < _h; j++) {
-            uint32_t *row = (uint32_t *)(_bits + j * _pitch);
-            for (int i = 0; i < _w; i++, row++)
+        for (int j = 0; j < m_height; j++) {
+            uint32_t *row = (uint32_t *)(m_bits + j * m_pitch);
+            for (int i = 0; i < m_width; i++, row++)
                 memcpy(row, &color, sizeof(uint32_t));
         }
     }
 
     inline void SetPixel(int x, int y, uint32_t color) {
-        if (x >= 0 && x < _w && y >= 0 && y < _h) {
-            memcpy(_bits + y * _pitch + x * 4, &color, sizeof(uint32_t));
+        if (x >= 0 && x < m_width && y >= 0 && y < m_height) {
+            memcpy(m_bits + y * m_pitch + x * 4, &color, sizeof(uint32_t));
         }
     }
 
     inline uint32_t GetPixel(int x, int y) const {
         uint32_t color = 0;
-        if (x >= 0 && x < _w && y >= 0 && y < _h) {
-            memcpy(&color, _bits + y * _pitch + x * 4, sizeof(uint32_t));
+        if (x >= 0 && x < m_width && y >= 0 && y < m_height) {
+            memcpy(&color, m_bits + y * m_pitch + x * 4, sizeof(uint32_t));
         }
         return color;
     }
@@ -82,21 +81,18 @@ class Bitmap {
             return;
         } else if (x1 == x2) {
             int inc = (y1 <= y2) ? 1 : -1;
-            for (y = y1; y != y2; y += inc)
-                SetPixel(x1, y, color);
+            for (y = y1; y != y2; y += inc) SetPixel(x1, y, color);
             SetPixel(x2, y2, color);
         } else if (y1 == y2) {
             int inc = (x1 <= x2) ? 1 : -1;
-            for (x = x1; x != x2; x += inc)
-                SetPixel(x, y1, color);
+            for (x = x1; x != x2; x += inc) SetPixel(x, y1, color);
             SetPixel(x2, y2, color);
         } else {
             int dx = (x1 < x2) ? x2 - x1 : x1 - x2;
             int dy = (y1 < y2) ? y2 - y1 : y1 - y2;
             int rem = 0;
             if (dx >= dy) {
-                if (x2 < x1)
-                    x = x1, y = y1, x1 = x2, y1 = y2, x2 = x, y2 = y;
+                if (x2 < x1) x = x1, y = y1, x1 = x2, y1 = y2, x2 = x, y2 = y;
                 for (x = x1, y = y1; x <= x2; x++) {
                     SetPixel(x, y, color);
                     rem += dy;
@@ -108,8 +104,7 @@ class Bitmap {
                 }
                 SetPixel(x2, y2, color);
             } else {
-                if (y2 < y1)
-                    x = x1, y = y1, x1 = x2, y1 = y2, x2 = x, y2 = y;
+                if (y2 < y1) x = x1, y = y1, x1 = x2, y1 = y2, x2 = x, y2 = y;
                 for (x = x1, y = y1; y <= y2; y++) {
                     SetPixel(x, y, color);
                     rem += dx;
@@ -124,7 +119,7 @@ class Bitmap {
         }
     }
 
-    struct BITMAPINFOHEADER { // bmih
+    struct BITMAPINFOHEADER {  // bmih
         uint32_t biSize;
         uint32_t biWidth;
         int32_t biHeight;
@@ -141,8 +136,7 @@ class Bitmap {
     // 读取 BMP 图片，支持 24/32 位两种格式
     inline static Bitmap *LoadFile(const char *filename) {
         FILE *fp = fopen(filename, "rb");
-        if (fp == NULL)
-            return NULL;
+        if (fp == NULL) return NULL;
         BITMAPINFOHEADER info;
         uint8_t header[14];
         int hr = (int)fread(header, 1, 14, fp);
@@ -184,8 +178,7 @@ class Bitmap {
     // 保存 BMP 图片
     inline bool SaveFile(const char *filename, bool withAlpha = false) const {
         FILE *fp = fopen(filename, "wb");
-        if (fp == NULL)
-            return false;
+        if (fp == NULL) return false;
         BITMAPINFOHEADER info;
         uint32_t pixelsize = (withAlpha) ? 4 : 3;
         uint32_t pitch = (GetW() * pixelsize + 3) & (~3);
@@ -215,8 +208,7 @@ class Bitmap {
             for (int x = 0; x < GetW(); x++, line += 4) {
                 fwrite(line, pixelsize, 1, fp);
             }
-            for (int i = 0; i < (int)padding; i++)
-                fputc(0, fp);
+            for (int i = 0; i < (int)padding; i++) fputc(0, fp);
         }
         fclose(fp);
         return true;
@@ -226,14 +218,13 @@ class Bitmap {
     inline uint32_t SampleBilinear(float x, float y) const {
         int32_t fx = (int32_t)(x * 0x10000);
         int32_t fy = (int32_t)(y * 0x10000);
-        int32_t x1 = Between(0, _w - 1, fx >> 16);
-        int32_t y1 = Between(0, _h - 1, fy >> 16);
-        int32_t x2 = Between(0, _w - 1, x1 + 1);
-        int32_t y2 = Between(0, _h - 1, y1 + 1);
+        int32_t x1 = Between(0, m_width - 1, fx >> 16);
+        int32_t y1 = Between(0, m_height - 1, fy >> 16);
+        int32_t x2 = Between(0, m_width - 1, x1 + 1);
+        int32_t y2 = Between(0, m_height - 1, y1 + 1);
         int32_t dx = (fx >> 8) & 0xff;
         int32_t dy = (fy >> 8) & 0xff;
-        if (_w <= 0 || _h <= 0)
-            return 0;
+        if (m_width <= 0 || m_height <= 0) return 0;
         uint32_t c00 = GetPixel(x1, y1);
         uint32_t c01 = GetPixel(x2, y1);
         uint32_t c10 = GetPixel(x1, y2);
@@ -243,7 +234,7 @@ class Bitmap {
 
     // 纹理采样
     inline Vec4f Sample2D(float u, float v) const {
-        uint32_t rgba = SampleBilinear(u * _w + 0.5f, v * _h + 0.5f);
+        uint32_t rgba = SampleBilinear(u * m_width + 0.5f, v * m_height + 0.5f);
         return vector_from_color(rgba);
     }
 
@@ -259,19 +250,19 @@ class Bitmap {
 
     // 上下反转
     inline void FlipVertical() {
-        uint8_t *buffer = new uint8_t[_pitch];
-        for (int i = 0, j = _h - 1; i < j; i++, j--) {
-            memcpy(buffer, GetLine(i), _pitch);
-            memcpy(GetLine(i), GetLine(j), _pitch);
-            memcpy(GetLine(j), buffer, _pitch);
+        uint8_t *buffer = new uint8_t[m_pitch];
+        for (int i = 0, j = m_height - 1; i < j; i++, j--) {
+            memcpy(buffer, GetLine(i), m_pitch);
+            memcpy(GetLine(i), GetLine(j), m_pitch);
+            memcpy(GetLine(j), buffer, m_pitch);
         }
         delete[] buffer;
     }
 
     // 水平反转
     inline void FlipHorizontal() {
-        for (int y = 0; y < _h; y++) {
-            for (int i = 0, j = _w - 1; i < j; i++, j--) {
+        for (int y = 0; y < m_height; y++) {
+            for (int i = 0, j = m_width - 1; i < j; i++, j--) {
                 uint32_t c1 = GetPixel(i, y);
                 uint32_t c2 = GetPixel(j, y);
                 SetPixel(i, y, c2);
@@ -280,7 +271,7 @@ class Bitmap {
         }
     }
 
-  protected:
+   protected:
     // 双线性插值计算：给出四个点的颜色，以及坐标偏移，计算结果
     inline static uint32_t BilinearInterp(uint32_t tl, uint32_t tr, uint32_t bl,
                                           uint32_t br, int32_t distx,
@@ -309,9 +300,9 @@ class Bitmap {
         return r;
     }
 
-  protected:
-    int32_t _w;
-    int32_t _h;
-    int32_t _pitch;
-    uint8_t *_bits;
+   protected:
+    int32_t m_width;
+    int32_t m_height;
+    int32_t m_pitch;
+    uint8_t *m_bits;
 };

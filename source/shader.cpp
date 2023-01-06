@@ -1,8 +1,8 @@
 #include "shader.h"
 
 void ShaderContext::Clear() {
-    varying_float_.clear();
-    varying_vec2f_.clear();
-    varying_vec3f_.clear();
-    varying_vec4f_.clear();
+    varyingFloat.clear();
+    varyingVec2F.clear();
+    varyingVec3F.clear();
+    varyingVec4F.clear();
 }
