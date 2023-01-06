@@ -1,7 +1,22 @@
-BasedOnStyle: Google
+BasedOnStyle: LLVM
 
 Language: Cpp
-TabWidth: 4
-UseTab: Never
 IndentWidth: 4
-ColumnLimit: 80
+
+# AlignSetting
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignEscapedNewlines: DontAlign
+PointerAlignment: Left
+ReferenceAlignment: Left
+AccessModifierOffset: -4
+
+#AllowSetting
+AllowShortIfStatementsOnASingleLine: Always
+AllowShortBlocksOnASingleLine: Always
+AllowShortEnumsOnASingleLine: true
+AllowShortLambdasOnASingleLine: All
+
+#Other
+ColumnLimit: 100

@@ -2,7 +2,7 @@
 
 void ShaderContext::Clear() {
     varyingFloat.clear();
-    varyingVec2F.clear();
-    varyingVec3F.clear();
-    varyingVec4F.clear();
+    varyingVec2f.clear();
+    varyingVec3f.clear();
+    varyingVec4f.clear();
 }
