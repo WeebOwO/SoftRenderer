@@ -59,16 +59,15 @@ void Renderer::RenderScene(Scene& scene) {
                     Vec3f eyeDir     = input.varyingVec3f[VARYING_EYE];
                     Vec4f baseColor  = model->diffuse(uv);
                     Vec3f lightColor = light->GetLightColor();
-                    Vec3f l          = vector_normalize(light->GetLightPos());
+                    Vec3f lightDir   = vector_normalize(light->GetLightDir());
                     Vec3f normal     = (model->normal(uv).xyz1() * matModelIt).xyz();
-                    Vec3f r          = vector_normalize(normal * vector_dot(normal, l) * 2.0f - l);
-                    float s          = model->Specular(uv);
-                    float p          = Saturate(vector_dot(r, eyeDir));
-                    float specIntensity = Saturate(pow(p, s * 10) * 0.05);
+                    Vec3f reflectionDir = vector_normalize(normal * vector_dot(normal, lightDir) * 2.0f - lightDir);
+                    float specBaseFactor          = Saturate(vector_dot(reflectionDir, eyeDir));
+                    float specIntensity = Saturate(pow(specBaseFactor, model->Specular(uv) * 10));
 
-                    float diffuseIntensity = vector_dot(l, normal);
+                    float diffuseIntensity = vector_dot(lightDir, normal);
                     float ambientIntensity = 0.1;
-                    // test color
+                    //    test color
                     //    Vec4f ambient_color = ambientIntensity * baseColor;
                     //    Vec4f diffuse_color = diffuseIntensity * baseColor;
                     //    Vec4f specular_color = specIntensity * baseColor;
