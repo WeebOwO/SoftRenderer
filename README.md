@@ -8,7 +8,7 @@ In linux platform, you can install the package through commands below.
 sudo apt-get install libsdl2-dev
 ```
 ## Build
-You need cmake and c++ compiler. After having those tools. You can run commands below to build this project. Current only test on Linux, if you want to build this on Winodows or other platform, you need change some setting in CMakeLists.txt.
+You need cmake and c++ compiler. After having those tools. You can run commands below to build this project. Current only test on linux, if you want to build this on windows or other platform, you need change some settings in CMakeLists.txt.
 
 ``` bash
  mkdir build
