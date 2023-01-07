@@ -61,9 +61,10 @@ void Renderer::RenderScene(Scene& scene) {
                     Vec3f lightColor = light->GetLightColor();
                     Vec3f lightDir   = vector_normalize(light->GetLightDir());
                     Vec3f normal     = (model->normal(uv).xyz1() * matModelIt).xyz();
-                    Vec3f reflectionDir = vector_normalize(normal * vector_dot(normal, lightDir) * 2.0f - lightDir);
-                    float specBaseFactor          = Saturate(vector_dot(reflectionDir, eyeDir));
-                    float specIntensity = Saturate(pow(specBaseFactor, model->Specular(uv) * 10));
+                    Vec3f reflectionDir =
+                        vector_normalize(normal * vector_dot(normal, lightDir) * 2.0f - lightDir);
+                    float specBaseFactor = Saturate(vector_dot(reflectionDir, eyeDir));
+                    float specIntensity  = Saturate(pow(specBaseFactor, model->Specular(uv) * 10));
 
                     float diffuseIntensity = vector_dot(lightDir, normal);
                     float ambientIntensity = 0.1;
