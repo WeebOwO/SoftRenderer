@@ -300,11 +300,11 @@ void Renderer::Resize(int width, int height) {
 
 void Renderer::ResizeDepthBuffer(int width, int height) { m_depthBuffer.resize(width * height); }
 
-void Renderer::SetVertexShader(VertexShader vertex_shader) {
-    m_vertexShader = std::move(vertex_shader);
+void Renderer::SetVertexShader(VertexShader vertexShader) {
+    m_vertexShader = std::move(vertexShader);
 }
 
-void Renderer::SetPixelShader(PixelShader pixel_shader) { m_pixelShader = std::move(pixel_shader); }
+void Renderer::SetPixelShader(PixelShader pixelShader) { m_pixelShader = std::move(pixelShader); }
 
 void Renderer::ResizeFrameBuffer(int width, int height) {
     m_swapTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_ARGB8888,

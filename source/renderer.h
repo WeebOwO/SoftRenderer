@@ -31,8 +31,8 @@ public:
     void Resize(int width, int height);
     void ResizeDepthBuffer(int width, int height);
     void ResizeFrameBuffer(int width, int height);
-    void SetVertexShader(VertexShader vertex_shader);
-    void SetPixelShader(PixelShader pixel_shader);
+    void SetVertexShader(VertexShader vertexShader);
+    void SetPixelShader(PixelShader pixelShader);
     Renderer() = delete;
     explicit Renderer(const WindowInfo& windowInfo);
     ~Renderer();
