@@ -31,7 +31,7 @@ void Renderer::RenderScene(Scene& scene) {
 
     std::array<VertexAttrib, 3> vsInputs;
 
-    for (const auto& model : scene.GetModels())
+    for (const auto& model : scene.GetModels()) {
         for (const auto& light : scene.GetLights()) {
             for (bool running = true; running;) {
                 SDL_Event event;
@@ -89,6 +89,7 @@ void Renderer::RenderScene(Scene& scene) {
                 SDL_Delay(1000 / 60);
             }
         }
+    }
 }
 ShaderContext Renderer::BarycentricInterplate(std::span<Vertex, 3> vertices,
                                               const Vec3f&         barycentric) {
