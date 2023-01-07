@@ -4,6 +4,8 @@ project(SoftRenderer)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_STANDARD 11)
 
+find_package(SDL2 REQUIRED)
+
 file(GLOB SRC_FILES
         "${PROJECT_SOURCE_DIR}/source/*.h"
         "${PROJECT_SOURCE_DIR}/source/*.cpp"
