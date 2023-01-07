@@ -136,7 +136,7 @@ void Renderer::DrawPrimitive(std::span<VertexAttrib, 3> vertexAttributes) {
     int                   width = m_windowWidth, height = m_windowHeight;
     int                   min_x, max_x, min_y, max_y;
 
-    for (std::weakly_incrementable auto i : std::ranges::views::iota(0, 3)) {
+    for (int i : std::ranges::views::iota(0, 3)) {
         vertices[i].context.Clear();
         // 运行Vertex Shader
         vertices[i].pos = m_vertexShader(vertexAttributes[i], vertices[i].context);
@@ -193,7 +193,7 @@ void Renderer::DrawPrimitive(std::span<VertexAttrib, 3> vertexAttributes) {
     // 迭代三角形外接矩形的所有点
     auto horizontalRange = std::ranges::views::iota(min_x, max_x + 1);
     auto verticalRange   = std::ranges::views::iota(min_y, max_y + 1);
-    for (std::weakly_incrementable auto cy : verticalRange) {
+    for (int cy : verticalRange) {
         // 利于并行化STL foreach 进行加速
         std::for_each(
             std::execution::par, horizontalRange.begin(), horizontalRange.end(), [&](int cx) {
