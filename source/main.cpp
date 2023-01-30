@@ -1,6 +1,3 @@
-#include <SDL2/SDL.h>
-
-#include "other/model.h"
 #include "renderer.h"
 
 int main() {

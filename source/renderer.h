@@ -26,7 +26,7 @@ public:
     void RenderPresent();
     void DrawPrimitive(std::span<VertexAttrib, 3> vertexAttributes);
     void RenderClear();
-    void RenderScene(Scene& scene) const;
+    void RenderScene(Scene& scene);
     void DrawPixel(int x, int y, const Vec4f& color);
     void Resize(int width, int height);
     void ResizeDepthBuffer(int width, int height);
