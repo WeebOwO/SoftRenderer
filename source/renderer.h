@@ -26,7 +26,7 @@ public:
     void RenderPresent();
     void DrawPrimitive(std::span<VertexAttrib, 3> vertexAttributes);
     void RenderClear();
-    void RenderScene(Scene& scene);
+    void RenderScene(Scene& scene) const;
     void DrawPixel(int x, int y, const Vec4f& color);
     void Resize(int width, int height);
     void ResizeDepthBuffer(int width, int height);
@@ -36,7 +36,8 @@ public:
     Renderer() = delete;
     explicit Renderer(const WindowInfo& windowInfo);
     ~Renderer();
-
+    Renderer& operator=(const Renderer& other) = delete;
+    Renderer(const Renderer& other) = delete;
 private:
     ShaderContext BarycentricInterplate(std::span<Vertex, 3> vertices, const Vec3f& barycentric);
 

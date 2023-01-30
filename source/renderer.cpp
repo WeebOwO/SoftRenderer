@@ -15,7 +15,7 @@ static bool IsTopLeft(const Vec2i& a, const Vec2i& b) {
     return ((a.y == b.y) && (a.x < b.x)) || (a.y > b.y);
 }
 
-void Renderer::RenderScene(Scene& scene) {
+void Renderer::RenderScene(Scene& scene) const {
     Vec3f eyePos      = {0, 0, 2};
     Vec3f eyeAt       = {0, 0, 0};
     Vec3f eyeUp       = {0, 1, 0};
