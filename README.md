@@ -1,5 +1,5 @@
 # SoftRenderer
- A simple renderer without graphic api like Vulcan, DirectX and OpenGL. 
+ A simple renderer without graphic api like Vulkan, DirectX and OpenGL. 
  
 ## Dependency
 SDL2 for create window and draw point.
