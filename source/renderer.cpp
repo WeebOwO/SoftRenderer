@@ -56,7 +56,7 @@ void Renderer::RenderScene(Scene& scene) {
                     Vec2f uv         = input.varyingVec2f[VARYING_UV];
                     Vec3f eyeDir     = input.varyingVec3f[VARYING_EYE];
                     Vec3f normal     = (model->normal(uv).xyz1() * matModelIt).xyz();
-                    // 背面剔除
+                 
                     if (vector_dot(normal, lightDir) < 0) return Vec4f(0.0f, 0.0f, 0.0f, 0.0f);
                     Vec4f baseColor  = model->diffuse(uv);
                     Vec3f lightColor = light->GetLightColor();
