@@ -9,7 +9,6 @@
 
 constexpr int VARYING_UV    = 0;
 constexpr int VARYING_EYE   = 1;
-constexpr int VARYING_DEPTH = 2;
 
 static bool IsTopLeft(const Vec2i& a, const Vec2i& b) {
     return ((a.y == b.y) && (a.x < b.x)) || (a.y > b.y);
@@ -45,33 +44,34 @@ void Renderer::RenderScene(Scene& scene) {
                 RenderClear();
 
                 SetVertexShader([&](VertexAttrib& vsInput, ShaderContext& output) -> Vec4f {
-                    Vec4f pos                          = vsInput.pos.xyz1() * mvp;
-                    Vec3f posWorld                     = (vsInput.pos.xyz1() * matModel).xyz();
-                    Vec3f eyeDir                       = eyePos - posWorld;
-                    output.varyingVec2f[VARYING_UV]    = vsInput.uv;
-                    output.varyingVec3f[VARYING_EYE]   = eyeDir;
+                    Vec4f pos                        = vsInput.pos.xyz1() * mvp;
+                    Vec3f posWorld                   = (vsInput.pos.xyz1() * matModel).xyz();
+                    Vec3f eyeDir                     = eyePos - posWorld;
+                    output.varyingVec2f[VARYING_UV]  = vsInput.uv;
+                    output.varyingVec3f[VARYING_EYE] = eyeDir;
                     return pos;
                 });
 
                 SetPixelShader([&](ShaderContext& input) {
                     Vec2f uv         = input.varyingVec2f[VARYING_UV];
                     Vec3f eyeDir     = input.varyingVec3f[VARYING_EYE];
+                    Vec3f normal     = (model->normal(uv).xyz1() * matModelIt).xyz();
+                    // 背面剔除
+                    if (vector_dot(normal, lightDir) < 0) return Vec4f(0.0f, 0.0f, 0.0f, 0.0f);
                     Vec4f baseColor  = model->diffuse(uv);
                     Vec3f lightColor = light->GetLightColor();
                     Vec3f lightDir   = vector_normalize(light->GetLightDir());
-                    Vec3f normal     = (model->normal(uv).xyz1() * matModelIt).xyz();
-
-                    if (vector_dot(normal, lightDir) < 0) return Vec4f (0.0f, 0.0f, 0.0f, 0.0f);
                     Vec3f reflectionDir =
                         vector_normalize(normal * vector_dot(normal, lightDir) * 2.0f - lightDir);
 
                     float specBaseFactor = Saturate(vector_dot(reflectionDir, eyeDir));
-                    float specIntensity  = 0.05 * Saturate(pow(specBaseFactor, model->Specular(uv) * 10));
+                    float specIntensity =
+                        0.05 * Saturate(pow(specBaseFactor, model->Specular(uv) * 10));
 
                     float diffuseIntensity = vector_dot(lightDir, normal);
 
-                    Vec4f outputColor = (diffuseIntensity + 0.1f + specIntensity) *
-                                        baseColor * lightColor.xyz1();
+                    Vec4f outputColor =
+                        (diffuseIntensity + 0.1f + specIntensity) * baseColor * lightColor.xyz1();
                     return vector_clamp(outputColor, 0.0f, 1.0f);
                 });
 
@@ -172,11 +172,6 @@ void Renderer::DrawPrimitive(std::span<VertexAttrib, 3> vertexAttributes) {
     Vec4f v01    = vertices[1].pos - vertices[0].pos;
     Vec4f v02    = vertices[2].pos - vertices[0].pos;
     Vec4f normal = vector_cross(v01, v02);
-
-    // 背面剔除，利用三角形顺序来确定
-//    float t1 = (vertices[2].spf.x - vertices[1].spf.x) * (vertices[2].spf.y - vertices[1].spf.y);
-//    float t2 = (vertices[3].spf.x - vertices[1].spf.x) * (vertices[3].spf.y - vertices[1].spf.y);
-//    if(t1 * t2 > 0) return;
 
     if (normal.z > 0.0f) { std::swap(vertices[2], vertices[1]); }
 
