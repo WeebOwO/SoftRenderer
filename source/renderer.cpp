@@ -57,7 +57,7 @@ void Renderer::RenderScene(Scene& scene) {
                     Vec3f eyeDir     = input.varyingVec3f[VARYING_EYE];
                     Vec3f normal     = (model->normal(uv).xyz1() * matModelIt).xyz();
                  
-                    if (vector_dot(normal, lightDir) < 0) return Vec4f(0.0f, 0.0f, 0.0f, 0.0f);
+                    if (vector_dot(normal, eyeDir) < 0) return Vec4f(0.0f, 0.0f, 0.0f, 0.0f);
                     Vec4f baseColor  = model->diffuse(uv);
                     Vec3f lightColor = light->GetLightColor();
                     Vec3f lightDir   = vector_normalize(light->GetLightDir());
